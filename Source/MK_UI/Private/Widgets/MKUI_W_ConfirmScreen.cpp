@@ -99,7 +99,6 @@ void UMKUI_W_ConfirmScreen::initConfirmScreen(UConfirmScreenInfoObject* infoObje
             case EConfirmScreenButtonType::Unknown:
                 break;
         }
-        check(inputAction);
 
         auto addedButton = mButtons->CreateEntry<UMKUI_CommonButtonBase>(); // creates entry into the dynamic box and returns a ptr to it
         addedButton->setButtonText(availableButtonInfo.mButtonText);

@@ -28,6 +28,7 @@ public class MK_UI : ModuleRules
 				"Core",
 				"GameplayTags",
 				"UMG", 
+				"EnhancedInput",
 				"CommonUI",
 				"CommonInput",
 				"DeveloperSettings",
