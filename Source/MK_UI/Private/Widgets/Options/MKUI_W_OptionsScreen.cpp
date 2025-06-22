@@ -6,6 +6,9 @@
 #include "ICommonInputModule.h"
 #include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
+#include "Widgets/Components/MKUI_TabListWidgetBase.h"
+#include "Widgets/Options/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
 void UMKUI_W_OptionsScreen::NativeOnInitialized()
 {
@@ -34,6 +37,41 @@ void UMKUI_W_OptionsScreen::NativeOnInitialized()
                                                                    &ThisClass::onBackBoundActionTriggered));
 
     RegisterUIActionBinding(backActionArgs);
+
+    mOptionsTabList->OnTabSelected.AddUniqueDynamic(this, &UMKUI_W_OptionsScreen::onOptionsTabSelected);
+}
+
+void UMKUI_W_OptionsScreen::NativeOnActivated()
+{
+    /** when options screen is activated, it goes over all the registered tabs in the data registry,
+     * and if the data registry not created yet, it also creates it.
+     * while going over the registered tab collections in the data registry, it registers each tab
+     * into the "Options" tab list.
+     */
+    Super::NativeOnActivated();
+
+    for (const auto tabCollection : getDataRegistry()->getRegisteredTabCollections()) {
+        if (!tabCollection) {
+            continue;
+        }
+
+        const FName tabId = tabCollection->getmDataId();
+        if (mOptionsTabList->GetTabButtonBaseByID(tabId)) {
+            continue;
+        }
+
+        mOptionsTabList->requestRegisterTabButton(tabId, tabCollection->getmDataDisplayName());
+    }
+}
+
+UMKUI_OptionsDataRegistry* UMKUI_W_OptionsScreen::getDataRegistry()
+{
+    if (!mDataRegistry) {
+        mDataRegistry = NewObject<UMKUI_OptionsDataRegistry>();
+        mDataRegistry->init(GetOwningLocalPlayer());
+    }
+    checkf(mDataRegistry, TEXT("Data registry of options menu isn't valid - this should never happen here"));
+    return mDataRegistry;
 }
 
 void UMKUI_W_OptionsScreen::onResetBoundActionTriggered()
@@ -45,4 +83,9 @@ void UMKUI_W_OptionsScreen::onResetBoundActionTriggered()
 void UMKUI_W_OptionsScreen::onBackBoundActionTriggered()
 {
     DeactivateWidget();
+}
+
+void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
+{
+    
 }
