@@ -7,7 +7,7 @@
 #include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
-#include "Widgets/Options/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
 void UMKUI_W_OptionsScreen::NativeOnInitialized()

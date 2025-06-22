@@ -3,7 +3,7 @@
 
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
-#include "Widgets/Options/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 
 void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
 {

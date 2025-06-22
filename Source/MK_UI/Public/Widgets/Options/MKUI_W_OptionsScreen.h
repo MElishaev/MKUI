@@ -6,6 +6,7 @@
 #include "Widgets/MKUI_W_ActivatableBase.h"
 #include "MKUI_W_OptionsScreen.generated.h"
 
+class UMKUI_CommonListView;
 class UMKUI_TabListWidgetBase;
 class UMKUI_OptionsDataRegistry;
 class UInputAction;
@@ -34,6 +35,9 @@ private:
     /**** bound widgets ****/
     UPROPERTY(meta=(BindWidget))
     UMKUI_TabListWidgetBase* mOptionsTabList;
+
+    UPROPERTY(meta=(BindWidget))
+    UMKUI_CommonListView* mOptionsList; // holds the various settings of the currently selected options tab
     /**** bound widgets ****/
 
     
