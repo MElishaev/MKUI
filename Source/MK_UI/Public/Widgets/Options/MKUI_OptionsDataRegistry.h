@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "MKUI_OptionsDataRegistry.generated.h"
 
+class UMKUI_ListDataObjectBase;
 class UMKUI_ListDataObjectCollection;
 /**
  * 
@@ -20,6 +21,8 @@ public:
     void init(ULocalPlayer* owningLocalPlayer);
 
     const TArray<UMKUI_ListDataObjectCollection*>& getRegisteredTabCollections() const { return mRegisteredTabCollections; } 
+    
+    TArray<UMKUI_ListDataObjectBase*> getListSourceItemsBySelectedTabId(const FName tabId) const;
     
 private:
     void initGameplayCollectionTab();

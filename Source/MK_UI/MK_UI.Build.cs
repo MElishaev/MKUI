@@ -41,6 +41,7 @@ public class MK_UI : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
+				"InputCore",
 				"Engine",
 				"Slate",
 				"SlateCore",

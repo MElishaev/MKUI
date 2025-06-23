@@ -13,7 +13,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class MK_UI_API UMKUI_ListDataObjectBase : public UObject
 {
     GENERATED_BODY()

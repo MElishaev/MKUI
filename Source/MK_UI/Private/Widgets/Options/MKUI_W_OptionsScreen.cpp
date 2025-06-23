@@ -6,6 +6,7 @@
 #include "ICommonInputModule.h"
 #include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
+#include "Widgets/Components/MKUI_CommonListView.h"
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
@@ -19,7 +20,7 @@ void UMKUI_W_OptionsScreen::NativeOnInitialized()
      * "Reset" action for resetting the options to their default state. This mean we need to
      * create manually the actions and register them to be LISTENED TO BY THIS WIDGET. 
      */
-    
+
     if (mEnhancedInputResetAction) {
         const FBindUIActionArgs resetActionArgs = FBindUIActionArgs(mEnhancedInputResetAction,
                                                                     true,
@@ -87,5 +88,14 @@ void UMKUI_W_OptionsScreen::onBackBoundActionTriggered()
 
 void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
 {
-    
+    const auto optionsList = getDataRegistry()->getListSourceItemsBySelectedTabId(tabId);
+    mOptionsList->SetListItems(optionsList);
+    mOptionsList->RequestRefresh();
+
+    // if there are items navigate to the top of the list and highlight (select) the first.
+    // (navigation is needed when the list is long and scrollable, we don't want to open the options tab mid list)
+    if (mOptionsList->GetNumItems() != 0) {
+        mOptionsList->NavigateToIndex(0);
+        mOptionsList->SetSelectedIndex(0);
+    }
 }

@@ -4,6 +4,7 @@
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
 
 void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
 {
@@ -13,12 +14,36 @@ void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
     initControlCollectionTab();
 }
 
+TArray<UMKUI_ListDataObjectBase*> UMKUI_OptionsDataRegistry::getListSourceItemsBySelectedTabId(const FName tabId) const
+{
+    auto tab = mRegisteredTabCollections.FindByPredicate([tabId](const UMKUI_ListDataObjectCollection* v) {
+        return v->getmDataId() == tabId;
+    });
+
+    checkf(tab, TEXT("No valid tab found with ID %s"), *tabId.ToString());
+
+    return (*tab)->getAllChildListData();
+}
+
 void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
 {
     // construct the data objects collection for the gameplay settings
     const auto gameplayTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     gameplayTabCollection->setmDataId(FName("gameplayTabCollection"));
     gameplayTabCollection->setmDataDisplayName(FText::FromString(TEXT("Gameplay")));
+
+    // todo: im not sure i like this approach but we will see as the course progresses...
+    //  i don't like about it that the options are hardcoded here in code - will see if there are option to disable or hide in widget.
+    //  im also not sure that all this overhead of inheritances is needed here.. why not use enums for settings of "texts", numbers
+    //  for slider and bool for checkboxes, why all these classes are needed? this maybe would look "uglier" but could be much simpler IMO.
+
+
+    // in this section allocate all the different settings for this tab
+    const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
+    gameDifficulty->setmDataId("gameDifficulty");
+    gameDifficulty->setmDataDisplayName(FText::FromString(TEXT("Difficulty")));
+    gameplayTabCollection->addChildListData(gameDifficulty);
+
     mRegisteredTabCollections.Add(gameplayTabCollection);
 }
 
