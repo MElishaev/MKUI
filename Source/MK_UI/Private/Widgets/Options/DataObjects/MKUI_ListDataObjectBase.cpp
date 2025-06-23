@@ -7,3 +7,8 @@ void UMKUI_ListDataObjectBase::initDataObject()
 {
     onDataObjectInitialized();
 }
+
+void UMKUI_ListDataObjectBase::notifyDataModified(UMKUI_ListDataObjectBase* data, EOptionsListDataModifiedReason reason)
+{
+    onListDataModified.Broadcast(data, reason);
+}

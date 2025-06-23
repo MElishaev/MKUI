@@ -42,6 +42,9 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
     gameDifficulty->setmDataId("gameDifficulty");
     gameDifficulty->setmDataDisplayName(FText::FromString(TEXT("Difficulty")));
+    gameDifficulty->addOptionValue("Easy", FText::FromString("Easy"));
+    gameDifficulty->addOptionValue("Normal", FText::FromString("Normal"));
+    gameDifficulty->addOptionValue("Hard", FText::FromString("Hard"));
     gameplayTabCollection->addChildListData(gameDifficulty);
 
     mRegisteredTabCollections.Add(gameplayTabCollection);

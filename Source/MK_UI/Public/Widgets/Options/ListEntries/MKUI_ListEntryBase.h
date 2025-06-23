@@ -7,6 +7,8 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "MKUI_ListEntryBase.generated.h"
 
+enum class EOptionsListDataModifiedReason : uint8;
+class UMKUI_ListDataObjectBase;
 class UCommonTextBlock;
 /**
  * 
@@ -19,6 +21,12 @@ class MK_UI_API UMKUI_ListEntryBase : public UCommonUserWidget, public IUserObje
 protected:
     virtual void NativeOnListItemObjectSet(UObject* listItemObject) override;
 
+    // Child class should override this method to implement initialization. Super call is expected.
+    // This is called when the data object that will be represented by this entry widget was set.
+    virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject);
+
+    // Child class should override this method to implement the modification of what that widget displays
+    virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason);
 private:
     /******** bound widgets **********/
     UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"))

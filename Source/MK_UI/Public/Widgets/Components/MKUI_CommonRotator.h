@@ -13,5 +13,8 @@ UCLASS(Abstract, BlueprintType, meta=(DisableNativeTick))
 class MK_UI_API UMKUI_CommonRotator : public UCommonRotator
 {
 	GENERATED_BODY()
+
+public:
+    void setSelectedOptionByText(const FText& optionText);
 	
 };

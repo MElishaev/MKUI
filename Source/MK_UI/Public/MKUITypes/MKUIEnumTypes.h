@@ -17,3 +17,12 @@ enum class EConfirmScreenButtonType : uint8
     Closed,
     Unknown UMETA(Hidden)
 };
+
+UENUM(BlueprintType)
+enum class EOptionsListDataModifiedReason : uint8
+{
+    DirectlyModified,
+    DependencyModified,
+    ResetToDefaults,
+    Unknown UMETA(Hidden)
+};

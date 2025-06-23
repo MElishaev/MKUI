@@ -6,6 +6,7 @@
 #include "MKUI_ListEntryBase.h"
 #include "MKUI_ListEntryString.generated.h"
 
+class UMKUI_ListDataObjectString;
 class UMKUI_CommonRotator;
 class UMKUI_CommonButtonBase;
 /**
@@ -16,7 +17,17 @@ class MK_UI_API UMKUI_ListEntryString : public UMKUI_ListEntryBase
 {
     GENERATED_BODY()
 
+protected:
+    virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject) override;
+    virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
+
+    virtual void NativeOnInitialized() override;
+    
 private:
+
+    void onButtonNextClicked();
+    void onButtonPrevClicked();
+    
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
     UMKUI_CommonButtonBase* mButtonPrev;
 
@@ -25,4 +36,7 @@ private:
 
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
     UMKUI_CommonButtonBase* mButtonNext;
+
+    UPROPERTY(Transient)
+    UMKUI_ListDataObjectString* mOwningListDataObject;    
 };
