@@ -44,6 +44,8 @@ public:
     FORCEINLINE UMKUI_ListDataObjectBase* getmParentData() const { return mParentData; }
     FORCEINLINE void setmParentData(UMKUI_ListDataObjectBase* parentData) { mParentData = parentData; }
 
+    FORCEINLINE void setmbShouldApplySettingImmediately(bool val) { mbShouldApplySettingImmediately = val; }
+
 protected:
     // empty in base class. should be overriden by child classes for initialization
     virtual void onDataObjectInitialized() {};
@@ -58,6 +60,7 @@ private:
     FText mDescriptionRichText;
     FText mDisabledRichText; // displayed when a specific setting is disabled for example
     TSoftObjectPtr<UTexture2D> mSoftDescriptionImage;
+    bool mbShouldApplySettingImmediately = false;
 
     UPROPERTY(Transient)
     UMKUI_ListDataObjectBase* mParentData;

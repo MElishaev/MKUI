@@ -24,6 +24,8 @@ public:
     void setmCurrentGameDifficulty(const FString& gameDifficulty) { mCurrentGameDifficulty = gameDifficulty; }
     
 private:
+    // the config property makes this one of the game settings that is stored in the .ini
+    // file and applied when the virtual function of  ApplySettings() is called
     UPROPERTY(Config)
     FString mCurrentGameDifficulty;
 };

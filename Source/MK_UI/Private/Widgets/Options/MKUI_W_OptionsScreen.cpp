@@ -6,6 +6,7 @@
 #include "ICommonInputModule.h"
 #include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
+#include "Settings/MKUI_GameUserSettings.h"
 #include "Widgets/Components/MKUI_CommonListView.h"
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
@@ -40,6 +41,16 @@ void UMKUI_W_OptionsScreen::NativeOnInitialized()
     RegisterUIActionBinding(backActionArgs);
 
     mOptionsTabList->OnTabSelected.AddUniqueDynamic(this, &UMKUI_W_OptionsScreen::onOptionsTabSelected);
+    mOptionsList->OnItemIsHoveredChanged().AddUObject(this, &ThisClass::onListViewItemHovered); // bind callback for item hovered state
+    mOptionsList->OnItemSelectionChanged().AddUObject(this, &ThisClass::onListViewItemSelected); // bind callback for item hovered state
+}
+
+void UMKUI_W_OptionsScreen::NativeOnDeactivated()
+{
+    Super::NativeOnDeactivated();
+    /** on deactivation of the options screen widget, trigger the game to
+     * apply the settings and save them into the .ini config file */
+    UMKUI_GameUserSettings::getInstance()->ApplySettings(true);
 }
 
 void UMKUI_W_OptionsScreen::NativeOnActivated()
@@ -97,5 +108,19 @@ void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
     if (mOptionsList->GetNumItems() != 0) {
         mOptionsList->NavigateToIndex(0);
         mOptionsList->SetSelectedIndex(0);
+    }
+}
+
+void UMKUI_W_OptionsScreen::onListViewItemHovered(UObject* hoveredItem, bool bHovered)
+{
+    if (!hoveredItem) {
+        return;
+    }
+}
+
+void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)
+{
+    if (!selectedItem) {
+        return;
     }
 }

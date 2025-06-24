@@ -21,7 +21,7 @@ void UMKUI_ListDataObjectString::advanceToNextOption()
     mCurrentValueString = mAvailableOptionsStrings[nextIndex];
 
     trySetCurrentTextFromStringValue(mCurrentValueString);
-    // updates the game user settings to store the vale for this setting
+    // updates the game user settings to store the value for this setting
     if (mDataDynamicSetter) {
         mDataDynamicSetter->setValueFromString(mCurrentValueString);
         notifyDataModified(this);
@@ -39,7 +39,7 @@ void UMKUI_ListDataObjectString::advanceToPrevOption()
     mCurrentValueString = mAvailableOptionsStrings[nextIndex];
 
     trySetCurrentTextFromStringValue(mCurrentValueString);
-    // updates the game user settings to store the vale for this setting
+    // updates the game user settings to store the value for this setting
     if (mDataDynamicSetter) {
         mDataDynamicSetter->setValueFromString(mCurrentValueString);
         notifyDataModified(this);

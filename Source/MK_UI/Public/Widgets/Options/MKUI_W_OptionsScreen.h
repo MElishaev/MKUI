@@ -21,6 +21,8 @@ class MK_UI_API UMKUI_W_OptionsScreen : public UMKUI_W_ActivatableBase
 protected:
     virtual void NativeOnInitialized() override;
 
+    virtual void NativeOnDeactivated() override;
+
     virtual void NativeOnActivated() override;
     
 private:
@@ -32,6 +34,9 @@ private:
     UFUNCTION()
     void onOptionsTabSelected(FName tabId);
 
+    void onListViewItemHovered(UObject* hoveredItem, bool bHovered);
+    void onListViewItemSelected(UObject* selectedItem);
+    
     /**** bound widgets ****/
     UPROPERTY(meta=(BindWidget))
     UMKUI_TabListWidgetBase* mOptionsTabList;
