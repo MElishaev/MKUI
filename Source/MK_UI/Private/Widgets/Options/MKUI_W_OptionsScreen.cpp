@@ -11,6 +11,7 @@
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
+#include "Widgets/Options/ListEntries/MKUI_ListEntryBase.h"
 
 void UMKUI_W_OptionsScreen::NativeOnInitialized()
 {
@@ -116,6 +117,9 @@ void UMKUI_W_OptionsScreen::onListViewItemHovered(UObject* hoveredItem, bool bHo
     if (!hoveredItem) {
         return;
     }
+    const auto entryWidget = mOptionsList->GetEntryWidgetFromItem<UMKUI_ListEntryBase>(hoveredItem);
+    check(entryWidget);
+    entryWidget->nativeOnListEntryWidgetHovered(bHovered);
 }
 
 void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)

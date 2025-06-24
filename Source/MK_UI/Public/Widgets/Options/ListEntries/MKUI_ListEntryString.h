@@ -27,6 +27,7 @@ private:
 
     void onButtonNextClicked();
     void onButtonPrevClicked();
+    void onRotatorClicked();
     
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
     UMKUI_CommonButtonBase* mButtonPrev;

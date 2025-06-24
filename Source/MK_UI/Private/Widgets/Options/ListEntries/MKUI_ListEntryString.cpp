@@ -30,6 +30,7 @@ void UMKUI_ListEntryString::NativeOnInitialized()
 
     mButtonNext->OnClicked().AddUObject(this, &ThisClass::onButtonNextClicked);
     mButtonPrev->OnClicked().AddUObject(this, &ThisClass::onButtonPrevClicked);
+    mOptionsRotator->OnClicked().AddUObject(this, &ThisClass::onRotatorClicked);
 }
 
 void UMKUI_ListEntryString::onButtonNextClicked()
@@ -37,6 +38,7 @@ void UMKUI_ListEntryString::onButtonNextClicked()
     if (mOwningListDataObject) {
         mOwningListDataObject->advanceToNextOption();
     }
+    selectThisEntryWidget();
 }
 
 void UMKUI_ListEntryString::onButtonPrevClicked()
@@ -44,4 +46,10 @@ void UMKUI_ListEntryString::onButtonPrevClicked()
     if (mOwningListDataObject) {
         mOwningListDataObject->advanceToPrevOption();
     }
+    selectThisEntryWidget();
+}
+
+void UMKUI_ListEntryString::onRotatorClicked()
+{
+    selectThisEntryWidget();
 }

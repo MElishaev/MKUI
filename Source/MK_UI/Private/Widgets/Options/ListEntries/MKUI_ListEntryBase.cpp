@@ -4,7 +4,13 @@
 #include "Widgets/Options/ListEntries/MKUI_ListEntryBase.h"
 
 #include "CommonTextBlock.h"
+#include "Components/ListView.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectBase.h"
+
+void UMKUI_ListEntryBase::nativeOnListEntryWidgetHovered(bool bHovered)
+{
+    BP_onListEntryWidgetHovered(bHovered, IsListItemSelected());
+}
 
 void UMKUI_ListEntryBase::NativeOnListItemObjectSet(UObject* listItemObject)
 {
@@ -28,4 +34,9 @@ void UMKUI_ListEntryBase::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* li
 void UMKUI_ListEntryBase::onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
 {
     // empty in base class
+}
+
+void UMKUI_ListEntryBase::selectThisEntryWidget()
+{
+    CastChecked<UListView>(GetOwningListView())->SetSelectedItem(GetListItem());
 }
