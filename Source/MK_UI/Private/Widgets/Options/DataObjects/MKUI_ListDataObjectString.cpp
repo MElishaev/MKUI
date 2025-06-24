@@ -2,6 +2,7 @@
 
 
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
+#include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
 
 void UMKUI_ListDataObjectString::addOptionValue(const FString& stringVal, const FText& displayText)
 {
@@ -20,7 +21,11 @@ void UMKUI_ListDataObjectString::advanceToNextOption()
     mCurrentValueString = mAvailableOptionsStrings[nextIndex];
 
     trySetCurrentTextFromStringValue(mCurrentValueString);
-    notifyDataModified(this);
+    // updates the game user settings to store the vale for this setting
+    if (mDataDynamicSetter) {
+        mDataDynamicSetter->setValueFromString(mCurrentValueString);
+        notifyDataModified(this);
+    }
 }
 
 void UMKUI_ListDataObjectString::advanceToPrevOption()
@@ -34,7 +39,11 @@ void UMKUI_ListDataObjectString::advanceToPrevOption()
     mCurrentValueString = mAvailableOptionsStrings[nextIndex];
 
     trySetCurrentTextFromStringValue(mCurrentValueString);
-    notifyDataModified(this);
+    // updates the game user settings to store the vale for this setting
+    if (mDataDynamicSetter) {
+        mDataDynamicSetter->setValueFromString(mCurrentValueString);
+        notifyDataModified(this);
+    }
 }
 
 void UMKUI_ListDataObjectString::onDataObjectInitialized()
@@ -44,8 +53,12 @@ void UMKUI_ListDataObjectString::onDataObjectInitialized()
         mCurrentValueString = mAvailableOptionsStrings[0];
     }
 
-    // todo: read the values from a config file instead of resetting them every time the game starts up
+    // read the values from a config file instead of resetting them every time the game starts up
+    if (mDataDynamicGetter && !mDataDynamicGetter->getValueAsString().IsEmpty()) {
+        mCurrentValueString = mDataDynamicGetter->getValueAsString();
+    }
 
+    
     if (!trySetCurrentTextFromStringValue(mCurrentValueString)) {
         mCurrentDisplayText = FText::FromString(TEXT("Invalid Option"));
     }

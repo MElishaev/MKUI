@@ -43,6 +43,7 @@ public class MK_UI : ModuleRules
 				"CoreUObject",
 				"InputCore",
 				"Engine",
+				"PropertyPath",
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	

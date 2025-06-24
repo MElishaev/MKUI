@@ -3,8 +3,13 @@
 
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
+#include "Settings/MKUI_GameUserSettings.h"
+#include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
+
+#define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName) \
+    MakeShared<MKUI_FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UMKUI_GameUserSettings, accessorFuncName))
 
 void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
 {
@@ -35,8 +40,7 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     // todo: im not sure i like this approach but we will see as the course progresses...
     //  i don't like about it that the options are hardcoded here in code - will see if there are option to disable or hide in widget.
     //  im also not sure that all this overhead of inheritances is needed here.. why not use enums for settings of "texts", numbers
-    //  for slider and bool for checkboxes, why all these classes are needed? this maybe would look "uglier" but could be much simpler IMO.
-
+    //  for slider and bool for checkboxes, why all these classes are needed? this maybe would look "uglier" but could be much simpler IMO.    
 
     // in this section allocate all the different settings for this tab
     const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
@@ -45,6 +49,11 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     gameDifficulty->addOptionValue("Easy", FText::FromString("Easy"));
     gameDifficulty->addOptionValue("Normal", FText::FromString("Normal"));
     gameDifficulty->addOptionValue("Hard", FText::FromString("Hard"));
+
+    // set path to the setter and getters
+    gameDifficulty->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getmCurrentGameDifficulty));
+    gameDifficulty->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setmCurrentGameDifficulty));
+
     gameplayTabCollection->addChildListData(gameDifficulty);
 
     mRegisteredTabCollections.Add(gameplayTabCollection);
