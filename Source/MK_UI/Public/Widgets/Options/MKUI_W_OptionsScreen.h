@@ -6,6 +6,7 @@
 #include "Widgets/MKUI_W_ActivatableBase.h"
 #include "MKUI_W_OptionsScreen.generated.h"
 
+class UMKUI_OptionsDetailsPanel;
 class UMKUI_CommonListView;
 class UMKUI_TabListWidgetBase;
 class UMKUI_OptionsDataRegistry;
@@ -36,6 +37,9 @@ private:
 
     void onListViewItemHovered(UObject* hoveredItem, bool bHovered);
     void onListViewItemSelected(UObject* selectedItem);
+
+    // helper method tries to return the input object class name or "invalid" if couldn't
+    FString tryGetEntryWidgetClassName(UObject* owningListItem) const;
     
     /**** bound widgets ****/
     UPROPERTY(meta=(BindWidget))
@@ -43,6 +47,9 @@ private:
 
     UPROPERTY(meta=(BindWidget))
     UMKUI_CommonListView* mOptionsList; // holds the various settings of the currently selected options tab
+
+    UPROPERTY(meta=(BindWidget))
+    UMKUI_OptionsDetailsPanel* mListEntryDetailsPanel; // details panel that show info about the selected option
     /**** bound widgets ****/
 
     

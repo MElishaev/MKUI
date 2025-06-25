@@ -11,6 +11,7 @@
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
+#include "Widgets/Options/MKUI_OptionsDetailsPanel.h"
 #include "Widgets/Options/ListEntries/MKUI_ListEntryBase.h"
 
 void UMKUI_W_OptionsScreen::NativeOnInitialized()
@@ -42,7 +43,7 @@ void UMKUI_W_OptionsScreen::NativeOnInitialized()
     RegisterUIActionBinding(backActionArgs);
 
     mOptionsTabList->OnTabSelected.AddUniqueDynamic(this, &UMKUI_W_OptionsScreen::onOptionsTabSelected);
-    mOptionsList->OnItemIsHoveredChanged().AddUObject(this, &ThisClass::onListViewItemHovered); // bind callback for item hovered state
+    mOptionsList->OnItemIsHoveredChanged().AddUObject(this, &ThisClass::onListViewItemHovered);  // bind callback for item hovered state
     mOptionsList->OnItemSelectionChanged().AddUObject(this, &ThisClass::onListViewItemSelected); // bind callback for item hovered state
 }
 
@@ -120,6 +121,16 @@ void UMKUI_W_OptionsScreen::onListViewItemHovered(UObject* hoveredItem, bool bHo
     const auto entryWidget = mOptionsList->GetEntryWidgetFromItem<UMKUI_ListEntryBase>(hoveredItem);
     check(entryWidget);
     entryWidget->nativeOnListEntryWidgetHovered(bHovered);
+
+    if (bHovered) {
+        mListEntryDetailsPanel->updateDetailsPanelInfo(CastChecked<UMKUI_ListDataObjectBase>(hoveredItem),
+                                                       tryGetEntryWidgetClassName(hoveredItem));
+    }
+    else {
+        if (const auto selectedItem = mOptionsList->GetSelectedItem<UMKUI_ListDataObjectBase>()) {
+            mListEntryDetailsPanel->updateDetailsPanelInfo(selectedItem, tryGetEntryWidgetClassName(selectedItem));
+        }
+    }
 }
 
 void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)
@@ -127,4 +138,15 @@ void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)
     if (!selectedItem) {
         return;
     }
+
+    mListEntryDetailsPanel->updateDetailsPanelInfo(CastChecked<UMKUI_ListDataObjectBase>(selectedItem),
+                                                       tryGetEntryWidgetClassName(selectedItem));
+}
+
+FString UMKUI_W_OptionsScreen::tryGetEntryWidgetClassName(UObject* owningListItem) const
+{
+    if (const auto foundEntry = mOptionsList->GetEntryWidgetFromItem(owningListItem)) {
+        return foundEntry->GetClass()->GetName();
+    }
+    return TEXT("Entry widget not valid");
 }
