@@ -70,4 +70,6 @@ private:
 
     UPROPERTY(Transient)
     TArray<UMKUI_ListDataObjectBase*> mResettableDataArray;
+
+    bool mbIsResettingData = false;
 };

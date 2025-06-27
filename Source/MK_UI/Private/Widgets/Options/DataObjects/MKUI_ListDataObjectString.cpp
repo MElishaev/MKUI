@@ -48,9 +48,13 @@ void UMKUI_ListDataObjectString::advanceToPrevOption()
 
 void UMKUI_ListDataObjectString::onDataObjectInitialized()
 {
-    if (!mAvailableOptionsStrings.IsEmpty()) {
-        // todo: is there a better way to choose the default values for settings?
-        mCurrentValueString = mAvailableOptionsStrings[0];
+    // if (!mAvailableOptionsStrings.IsEmpty()) {
+    //     // todo: is there a better way to choose the default values for settings?
+    //     mCurrentValueString = mAvailableOptionsStrings[0];
+    // }
+
+    if (hasDefaultValue()) {
+        mCurrentValueString = getDefaultValueAsString();
     }
 
     // read the values from a config file instead of resetting them every time the game starts up
@@ -58,7 +62,7 @@ void UMKUI_ListDataObjectString::onDataObjectInitialized()
         mCurrentValueString = mDataDynamicGetter->getValueAsString();
     }
 
-    
+
     if (!trySetCurrentTextFromStringValue(mCurrentValueString)) {
         mCurrentDisplayText = FText::FromString(TEXT("Invalid Option"));
     }

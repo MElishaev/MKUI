@@ -12,6 +12,14 @@ void UMKUI_CommonButtonBase::setButtonText(const FText& text)
     }
 }
 
+FText UMKUI_CommonButtonBase::getButtonText() const
+{
+    if (mCommonButtonText) {
+        return mCommonButtonText->GetText();
+    }
+    return FText();
+}
+
 void UMKUI_CommonButtonBase::NativePreConstruct()
 {
     Super::NativePreConstruct();

@@ -36,12 +36,9 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     const auto gameplayTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     gameplayTabCollection->setmDataId(FName("gameplayTabCollection"));
     gameplayTabCollection->setmDataDisplayName(FText::FromString(TEXT("Gameplay")));
-
-    // todo: im not sure i like this approach but we will see as the course progresses...
-    //  i don't like about it that the options are hardcoded here in code - will see if there are option to disable or hide in widget.
-    //  im also not sure that all this overhead of inheritances is needed here.. why not use enums for settings of "texts", numbers
-    //  for slider and bool for checkboxes, why all these classes are needed? this maybe would look "uglier" but could be much simpler IMO.    
-
+    
+    // TODO: best case will be to read and populate this data from some file that can be changed without recompiling the project
+    
     // in this section allocate all the different settings for this tab
     {
         const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();

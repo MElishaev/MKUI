@@ -7,6 +7,8 @@
 #include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
 #include "Settings/MKUI_GameUserSettings.h"
+#include "Subsystems/MKUI_Subsystem.h"
+#include "Widgets/Components/MKUI_CommonButtonBase.h"
 #include "Widgets/Components/MKUI_CommonListView.h"
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
@@ -91,7 +93,34 @@ UMKUI_OptionsDataRegistry* UMKUI_W_OptionsScreen::getDataRegistry()
 void UMKUI_W_OptionsScreen::onResetBoundActionTriggered()
 {
     // show confirmation screen for the user to make sure he want to reset the settings
-    MKUI_Debug::print(TEXT("reset button clicked"));
+    if (mResettableDataArray.IsEmpty()) {
+        return;
+    }
+
+    auto currentSelectedTabButton = mOptionsTabList->GetTabButtonBaseByID(mOptionsTabList->GetActiveTab());
+    auto tabName = CastChecked<UMKUI_CommonButtonBase>(currentSelectedTabButton)->getButtonText().ToString();
+
+    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+        EConfirmScreenType::YesNo,
+        FText::FromString(TEXT("Reset settings to default")),
+        FText::FromString(TEXT("Are you sure you want to reset the") + tabName + TEXT(" to default?")),
+        [this](EConfirmScreenButtonType buttonType) {
+            if (buttonType == EConfirmScreenButtonType::Confirmed) {
+                mbIsResettingData = true;
+                bool bSuccessfullyResetAll = true;
+                for (auto dataToRest : mResettableDataArray) {
+                    if (dataToRest) {
+                        bSuccessfullyResetAll &= dataToRest->tryResetBackToDefaultValue();
+                    }
+                }
+
+                if (bSuccessfullyResetAll) {
+                    mResettableDataArray.Empty();
+                    RemoveActionBinding(mResetActionHandle);
+                }
+                mbIsResettingData = false;
+            }
+        });
 }
 
 void UMKUI_W_OptionsScreen::onBackBoundActionTriggered()
@@ -175,7 +204,9 @@ void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)
 
 void UMKUI_W_OptionsScreen::onListViewDataModified(UMKUI_ListDataObjectBase* data, EOptionsListDataModifiedReason modificationReason)
 {
-    if (!data)
+    // we don't want to trigger this callback when the modification event is due to resetting all values to default.
+    // otherwise what happens is that the mResettableDataArray is modified while the reset callback clears it
+    if (!data || mbIsResettingData)
         return;
 
     /**

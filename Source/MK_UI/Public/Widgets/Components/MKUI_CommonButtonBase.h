@@ -19,6 +19,9 @@ class MK_UI_API UMKUI_CommonButtonBase : public UCommonButtonBase
 public:
     UFUNCTION(BlueprintCallable)
     void setButtonText(const FText& text);
+
+    UFUNCTION(BlueprintCallable)
+    FText getButtonText() const;
     
 private:
     // this function will be called on every change that is done in the WBP in editor while designing
