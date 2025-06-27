@@ -25,4 +25,7 @@ public:
      */ // todo change name to something like getWidgetClassFromSettingsByTag
     UFUNCTION(BlueprintPure, Category="UI Function Library")
     static TSoftClassPtr<UMKUI_W_ActivatableBase> getSoftWidgetClassByTag(UPARAM(meta=(Categories="MKUI.widget")) FGameplayTag widgetTag);
+
+    UFUNCTION(BlueprintPure, Category="UI Function Library")
+    static TSoftObjectPtr<UTexture2D> getOptionsSoftImageByTag(UPARAM(meta=(Categories="MKUI.image")) FGameplayTag imgTag);
 };

@@ -3,6 +3,7 @@
 
 #include "Widgets/Options/ListEntries/MKUI_ListEntryString.h"
 
+#include "CommonInputSubsystem.h"
 #include "Widgets/Components/MKUI_CommonButtonBase.h"
 #include "Widgets/Components/MKUI_CommonRotator.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
@@ -31,6 +32,7 @@ void UMKUI_ListEntryString::NativeOnInitialized()
     mButtonNext->OnClicked().AddUObject(this, &ThisClass::onButtonNextClicked);
     mButtonPrev->OnClicked().AddUObject(this, &ThisClass::onButtonPrevClicked);
     mOptionsRotator->OnClicked().AddUObject(this, &ThisClass::onRotatorClicked);
+    mOptionsRotator->OnRotatedEvent.AddUObject(this, &ThisClass::onRotatorValueChanged);
 }
 
 void UMKUI_ListEntryString::onButtonNextClicked()
@@ -52,4 +54,20 @@ void UMKUI_ListEntryString::onButtonPrevClicked()
 void UMKUI_ListEntryString::onRotatorClicked()
 {
     selectThisEntryWidget();
+}
+
+void UMKUI_ListEntryString::onRotatorValueChanged(int32 value, bool bUserInitiated)
+{
+    if (!mOwningListDataObject) {
+        return;
+    }
+
+    auto commonInputSubsystem = GetInputSubsystem();
+    if (!commonInputSubsystem || !bUserInitiated) {
+        return;
+    }
+
+    if (commonInputSubsystem->GetCurrentInputType() == ECommonInputType::Gamepad) {
+        mOwningListDataObject->onRotatorInitiatedValueChange(mOptionsRotator->GetSelectedText());
+    }
 }

@@ -21,6 +21,9 @@ public:
     void advanceToNextOption();
     void advanceToPrevOption();
 
+    
+    void onRotatorInitiatedValueChange(const FText& newSelectedText);
+
     FORCEINLINE const TArray<FText>& getmAvailableOptionsDisplayText() const { return mAvailableOptionsDisplayText; }
     FORCEINLINE FText getmCurrentDisplayText() const { return mCurrentDisplayText; }
 protected:

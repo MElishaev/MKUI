@@ -80,6 +80,16 @@ void UMKUI_W_OptionsScreen::NativeOnActivated()
     }
 }
 
+UWidget* UMKUI_W_OptionsScreen::NativeGetDesiredFocusTarget() const
+{
+    if (auto selectedObj = mOptionsList->GetSelectedItem()) {
+        if (auto selectedEntryWidget = mOptionsList->GetEntryWidgetFromItem(selectedObj)) {
+            return selectedEntryWidget;
+        }
+    }
+    return Super::NativeGetDesiredFocusTarget();
+}
+
 UMKUI_OptionsDataRegistry* UMKUI_W_OptionsScreen::getDataRegistry()
 {
     if (!mDataRegistry) {

@@ -46,6 +46,23 @@ void UMKUI_ListDataObjectString::advanceToPrevOption()
     }
 }
 
+void UMKUI_ListDataObjectString::onRotatorInitiatedValueChange(const FText& newSelectedText)
+{
+    const int32 index = mAvailableOptionsDisplayText.IndexOfByPredicate([newSelectedText](const FText& availableText) {
+        return availableText.EqualTo(newSelectedText);
+    });
+
+    if (index != INDEX_NONE && mAvailableOptionsStrings.IsValidIndex(index)) {
+        mCurrentDisplayText = newSelectedText;
+        mCurrentValueString = mAvailableOptionsStrings[index];
+
+        if (mDataDynamicSetter) {
+            mDataDynamicSetter->setValueFromString(mCurrentValueString);
+            notifyDataModified(this);
+        }
+    } 
+}
+
 void UMKUI_ListDataObjectString::onDataObjectInitialized()
 {
     // if (!mAvailableOptionsStrings.IsEmpty()) {

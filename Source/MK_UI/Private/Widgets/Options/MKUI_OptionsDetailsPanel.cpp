@@ -17,6 +17,9 @@ void UMKUI_OptionsDetailsPanel::updateDetailsPanelInfo(UMKUI_ListDataObjectBase*
         mDescriptionImage->SetBrushFromLazyTexture(dataObj->getmSoftDescriptionImage());
         mDescriptionImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
     }
+    else {
+        mDescriptionImage->SetVisibility(ESlateVisibility::Collapsed);
+    }
     mDescription->SetText(dataObj->getmDescriptionRichText());
     mTitle->SetText(dataObj->getmDataDisplayName());
     mDisabledReason->SetText(dataObj->getmDisabledRichText());

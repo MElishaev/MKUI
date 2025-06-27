@@ -3,6 +3,8 @@
 
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
+#include "MKUI_FunctionLibrary.h"
+#include "MKUI_GameplayTags.h"
 #include "Settings/MKUI_GameUserSettings.h"
 #include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
@@ -62,6 +64,7 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
         const auto testItem = NewObject<UMKUI_ListDataObjectString>();
         testItem->setmDataId("testItem");
         testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
+        testItem->setmSoftDescriptionImage(UMKUI_FunctionLibrary::getOptionsSoftImageByTag(MKUI_GameplayTags::MKUI_image_testImage));
         gameplayTabCollection->addChildListData(testItem);
     }
     

@@ -19,4 +19,8 @@ class MK_UI_API UMKUI_DeveloperSettings : public UDeveloperSettings
 public:
     UPROPERTY(Config, EditAnywhere, Category="Widget Reference", meta=(ForceInlineRow, Categories="MKUI.widget"))
     TMap<FGameplayTag, TSoftClassPtr<UMKUI_W_ActivatableBase>> mWidgetMap;
+
+    UPROPERTY(Config, EditAnywhere, Category="MKUI Options Image Reference", meta=(ForceInlineRow, Categories="MKUI.image.testImage"))
+    TMap<FGameplayTag, TSoftObjectPtr<UTexture2D>> mOptionsScreenSoftImageMap;
+
 };

@@ -23,10 +23,12 @@ class MK_UI_API UMKUI_W_OptionsScreen : public UMKUI_W_ActivatableBase
 
 protected:
     virtual void NativeOnInitialized() override;
-
     virtual void NativeOnDeactivated() override;
-
     virtual void NativeOnActivated() override;
+
+    // overriden for returning the focus back to the selected (first) item when the options menu become the active widget
+    // (for example, when closing confirmation screen, to return focus back to the selected item this needed to be implemented)
+    virtual UWidget* NativeGetDesiredFocusTarget() const override;
     
 private:
     UMKUI_OptionsDataRegistry* getDataRegistry();
