@@ -64,6 +64,25 @@ void UMKUI_ListDataObjectString::onDataObjectInitialized()
     }
 }
 
+bool UMKUI_ListDataObjectString::canResetBackToDefaultValue() const
+{
+    return hasDefaultValue() && (mCurrentValueString != getDefaultValueAsString());
+}
+
+bool UMKUI_ListDataObjectString::tryResetBackToDefaultValue()
+{
+    if (canResetBackToDefaultValue()) {
+        mCurrentValueString = getDefaultValueAsString();
+        trySetCurrentTextFromStringValue(mCurrentValueString);
+        if (mDataDynamicSetter) {
+            mDataDynamicSetter->setValueFromString(mCurrentValueString);
+            notifyDataModified(this, EOptionsListDataModifiedReason::ResetToDefaults);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool UMKUI_ListDataObjectString::trySetCurrentTextFromStringValue(const FString& stringVal)
 {
     const auto index = mAvailableOptionsStrings.IndexOfByKey(stringVal);

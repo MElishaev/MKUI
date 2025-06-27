@@ -43,24 +43,30 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     //  for slider and bool for checkboxes, why all these classes are needed? this maybe would look "uglier" but could be much simpler IMO.    
 
     // in this section allocate all the different settings for this tab
-    const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
-    gameDifficulty->setmDataId("gameDifficulty");
-    gameDifficulty->setmDataDisplayName(FText::FromString(TEXT("Difficulty")));
-    gameDifficulty->setmDescriptionRichText(FText::FromString(TEXT("This lets you control how challenging you want your experience to be")));
-    gameDifficulty->addOptionValue("Easy", FText::FromString("Easy"));
-    gameDifficulty->addOptionValue("Normal", FText::FromString("Normal"));
-    gameDifficulty->addOptionValue("Hard", FText::FromString("Hard"));
+    {
+        const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
+        gameDifficulty->setmDataId("gameDifficulty");
+        gameDifficulty->setmDataDisplayName(FText::FromString(TEXT("Difficulty")));
+        gameDifficulty->setmDescriptionRichText(FText::FromString(TEXT("This lets you control how challenging you want your experience to be")));
+        gameDifficulty->addOptionValue(TEXT("Easy"), FText::FromString("Easy"));
+        gameDifficulty->addOptionValue(TEXT("Normal"), FText::FromString("Normal"));
+        gameDifficulty->addOptionValue(TEXT("Hard"), FText::FromString("Hard"));
+        gameDifficulty->setDefaultValueFromString(TEXT("Normal"));
 
-    // set path to the setter and getters
-    gameDifficulty->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getmCurrentGameDifficulty));
-    gameDifficulty->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setmCurrentGameDifficulty));
+        // set path to the setter and getters
+        gameDifficulty->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getmCurrentGameDifficulty));
+        gameDifficulty->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setmCurrentGameDifficulty));
 
-    gameplayTabCollection->addChildListData(gameDifficulty);
+        gameplayTabCollection->addChildListData(gameDifficulty);
+    }
 
-    const auto testItem = NewObject<UMKUI_ListDataObjectString>();
-    testItem->setmDataId("testItem");
-    testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
-    gameplayTabCollection->addChildListData(testItem);
+    // test item for testing functionality when multiple values in the options tab
+    {
+        const auto testItem = NewObject<UMKUI_ListDataObjectString>();
+        testItem->setmDataId("testItem");
+        testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
+        gameplayTabCollection->addChildListData(testItem);
+    }
     
     mRegisteredTabCollections.Add(gameplayTabCollection);
 }

@@ -46,6 +46,17 @@ public:
 
     FORCEINLINE void setmbShouldApplySettingImmediately(bool val) { mbShouldApplySettingImmediately = val; }
 
+    /**
+     * These methods related to the ability to reset options back to default.
+     * Child classes should provide implementation for these.
+     */
+    // returns true if default value was assigned using the TOptional<> object
+    virtual bool hasDefaultValue() const { return false; }
+    // returns true if the setting has default value setup and the current value is not the default, otherwise false
+    virtual bool canResetBackToDefaultValue() const { return false; }
+    // if canResetBackToDefaultValue() returns true - this method will set the value to default, update the UI, and notify to store in config file
+    virtual bool tryResetBackToDefaultValue() { return false; }
+
 protected:
     // empty in base class. should be overriden by child classes for initialization
     virtual void onDataObjectInitialized() {};

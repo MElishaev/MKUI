@@ -6,6 +6,8 @@
 #include "Widgets/MKUI_W_ActivatableBase.h"
 #include "MKUI_W_OptionsScreen.generated.h"
 
+enum class EOptionsListDataModifiedReason : uint8;
+class UMKUI_ListDataObjectBase;
 class UMKUI_OptionsDetailsPanel;
 class UMKUI_CommonListView;
 class UMKUI_TabListWidgetBase;
@@ -37,6 +39,7 @@ private:
 
     void onListViewItemHovered(UObject* hoveredItem, bool bHovered);
     void onListViewItemSelected(UObject* selectedItem);
+    void onListViewDataModified(UMKUI_ListDataObjectBase* data, EOptionsListDataModifiedReason modificationReason);
 
     // helper method tries to return the input object class name or "invalid" if couldn't
     FString tryGetEntryWidgetClassName(UObject* owningListItem) const;
@@ -64,4 +67,7 @@ private:
     TObjectPtr<UInputAction> mEnhancedInputResetAction; // reset settings input actions
 
     FUIActionBindingHandle mResetActionHandle; // handle for removal of the action button from the BoundActionsBar
+
+    UPROPERTY(Transient)
+    TArray<UMKUI_ListDataObjectBase*> mResettableDataArray;
 };

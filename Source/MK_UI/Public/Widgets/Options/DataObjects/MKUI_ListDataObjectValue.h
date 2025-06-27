@@ -19,11 +19,20 @@ class MK_UI_API UMKUI_ListDataObjectValue : public UMKUI_ListDataObjectBase
 public:
     void setmDataDynamicGetter(const TSharedPtr<MKUI_FOptionsDataInteractionHelper>& dynamicGetter) { mDataDynamicGetter = dynamicGetter; }
     void setmDataDynamicSetter(const TSharedPtr<MKUI_FOptionsDataInteractionHelper>& dynamicSetter) { mDataDynamicSetter = dynamicSetter; }
+
+    void setDefaultValueFromString(const FString& defaultVal) { mDefaultStringValue = defaultVal; }
+    virtual bool hasDefaultValue() const override { return mDefaultStringValue.IsSet(); };
     
 protected:
     /* Below members store the path to the getters and setters for the value of
-     * the settings option that the child classes of this class represents */
+     * the settings option represented by the child classes */
     TSharedPtr<MKUI_FOptionsDataInteractionHelper> mDataDynamicGetter;
     TSharedPtr<MKUI_FOptionsDataInteractionHelper> mDataDynamicSetter;
+    
+    FString getDefaultValueAsString() const { return mDefaultStringValue.GetValue(); }
+
+private:
+    // we use here string because it is easily convertible value (e.g. string->int/float and vise-versa)
+    TOptional<FString> mDefaultStringValue;
 
 };

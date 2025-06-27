@@ -101,6 +101,9 @@ void UMKUI_W_OptionsScreen::onBackBoundActionTriggered()
 
 void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
 {
+    // clear previous details - SetSelectedIndex() below will trigger the update details panel with the first setting in the tab
+    mListEntryDetailsPanel->clearDetailsPanelInfo();
+
     const auto optionsList = getDataRegistry()->getListSourceItemsBySelectedTabId(tabId);
     mOptionsList->SetListItems(optionsList);
     mOptionsList->RequestRefresh();
@@ -110,6 +113,33 @@ void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
     if (mOptionsList->GetNumItems() != 0) {
         mOptionsList->NavigateToIndex(0);
         mOptionsList->SetSelectedIndex(0);
+    }
+
+    // store the current resettable data in the resettable array (only data that has default value and currently not default).
+    // we do this so that if we have settings that are not defaulted in the CURRENT TAB, then the "Reset" button will appear
+    // immediately when TAB opened.
+    // inside the loop we also bind a callback for each setting entry to affect dynamically the presence of the 
+    // Reset button on the fly if the settings deviate or align with the default manually by the user.
+    mResettableDataArray.Empty();
+    for (auto optionData : optionsList) {
+        if (!optionData)
+            continue;
+
+        if (!optionData->onListDataModified.IsBoundToObject(this)) {
+            optionData->onListDataModified.AddUObject(this, &ThisClass::onListViewDataModified);
+        }
+
+        if (optionData->canResetBackToDefaultValue()) {
+            mResettableDataArray.AddUnique(optionData);
+        }
+    }
+
+    // remove the Reset button if no resettable data when tab was opened, else add it if missing
+    if (mResettableDataArray.IsEmpty()) {
+        RemoveActionBinding(mResetActionHandle);
+    }
+    else if (!GetActionBindings().Contains(mResetActionHandle)) {
+        AddActionBinding(mResetActionHandle);
     }
 }
 
@@ -140,7 +170,31 @@ void UMKUI_W_OptionsScreen::onListViewItemSelected(UObject* selectedItem)
     }
 
     mListEntryDetailsPanel->updateDetailsPanelInfo(CastChecked<UMKUI_ListDataObjectBase>(selectedItem),
-                                                       tryGetEntryWidgetClassName(selectedItem));
+                                                   tryGetEntryWidgetClassName(selectedItem));
+}
+
+void UMKUI_W_OptionsScreen::onListViewDataModified(UMKUI_ListDataObjectBase* data, EOptionsListDataModifiedReason modificationReason)
+{
+    if (!data)
+        return;
+
+    /**
+     * check if the modification of the current setting triggered the tab to not be in default value state
+     * and if it is, add the Reset button to the screen, else, remove it
+     */
+    if (data->canResetBackToDefaultValue()) {
+        mResettableDataArray.AddUnique(data);
+        if (!GetActionBindings().Contains(mResetActionHandle)) {
+            AddActionBinding(mResetActionHandle);
+        }
+    }
+    else if (mResettableDataArray.Contains(data)) {
+        mResettableDataArray.Remove(data);
+    }
+
+    if (mResettableDataArray.IsEmpty()) {
+        RemoveActionBinding(mResetActionHandle);
+    }
 }
 
 FString UMKUI_W_OptionsScreen::tryGetEntryWidgetClassName(UObject* owningListItem) const

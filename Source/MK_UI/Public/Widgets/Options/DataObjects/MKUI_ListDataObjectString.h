@@ -25,6 +25,8 @@ public:
     FORCEINLINE FText getmCurrentDisplayText() const { return mCurrentDisplayText; }
 protected:
     virtual void onDataObjectInitialized() override;
+    virtual bool canResetBackToDefaultValue() const override;
+    virtual bool tryResetBackToDefaultValue() override;
 
     bool trySetCurrentTextFromStringValue(const FString& stringVal);
     
