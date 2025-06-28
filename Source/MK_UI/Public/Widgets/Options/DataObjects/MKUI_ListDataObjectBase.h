@@ -8,7 +8,9 @@
 #include "MKUI_ListDataObjectBase.generated.h"
 
 /**
- * 
+ * This class is a container for everything needed to be able to display the data for the
+ * setting entry in the options menu.
+ * This class instantiated in the OptionsDataRegistry in each of the options tab initializations. 
  */
 UCLASS(Abstract)
 class MK_UI_API UMKUI_ListDataObjectBase : public UObject
@@ -39,7 +41,7 @@ public:
     FORCEINLINE void setmDisabledRichText(const FText& disabledText) { mDisabledRichText = disabledText; }
 
     FORCEINLINE TSoftObjectPtr<UTexture2D> getmSoftDescriptionImage() const { return mSoftDescriptionImage; }
-    FORCEINLINE void setmSoftDescriptionImage(TSoftObjectPtr<UTexture2D> softTexPtr) { mSoftDescriptionImage = softTexPtr; }
+    FORCEINLINE void setmSoftDescriptionImage(const TSoftObjectPtr<UTexture2D>& softTexPtr) { mSoftDescriptionImage = softTexPtr; }
 
     FORCEINLINE UMKUI_ListDataObjectBase* getmParentData() const { return mParentData; }
     FORCEINLINE void setmParentData(UMKUI_ListDataObjectBase* parentData) { mParentData = parentData; }

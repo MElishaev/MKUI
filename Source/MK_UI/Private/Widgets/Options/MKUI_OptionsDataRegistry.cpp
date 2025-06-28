@@ -76,6 +76,29 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
     const auto audioTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     audioTabCollection->setmDataId(FName("audioTabCollection"));
     audioTabCollection->setmDataDisplayName(FText::FromString(TEXT("Audio")));
+
+    // volume category - collection of options related to the volume options
+    {
+        auto volumeCategoryCollection = NewObject<UMKUI_ListDataObjectCollection>();
+        volumeCategoryCollection->setmDataId(FName("volumeCategoryCollection"));
+        volumeCategoryCollection->setmDataDisplayName(FText::FromString(TEXT("Volume")));
+
+        audioTabCollection->addChildListData(volumeCategoryCollection);
+
+        // test item for category
+        {
+            auto testItem = NewObject<UMKUI_ListDataObjectString>();
+            testItem->setmDataId("testItem");
+            testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
+            volumeCategoryCollection->addChildListData(testItem);
+        }
+    }
+
+    // sound category
+    {
+        
+    }
+    
     mRegisteredTabCollections.Add(audioTabCollection);
 }
 

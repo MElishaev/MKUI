@@ -16,6 +16,6 @@ TSoftClassPtr<UMKUI_W_ActivatableBase> UMKUI_FunctionLibrary::getSoftWidgetClass
 TSoftObjectPtr<UTexture2D> UMKUI_FunctionLibrary::getOptionsSoftImageByTag(UPARAM(meta=(Categories="MKUI.image")) FGameplayTag imgTag)
 {
     const auto devSettings = GetDefault<UMKUI_DeveloperSettings>();
-    checkf(devSettings->mWidgetMap.Contains(imgTag), TEXT("Couldn't find the corresponding image %s"), *(imgTag.ToString()));
+    checkf(devSettings->mOptionsScreenSoftImageMap.Contains(imgTag), TEXT("Couldn't find the corresponding image %s"), *(imgTag.ToString()));
     return devSettings->mOptionsScreenSoftImageMap.FindRef(imgTag);
 }
