@@ -36,7 +36,7 @@ private:
     UCommonTextBlock* mTitle; // title of a specific setting details - i think this should be as the name of the setting
 
     UPROPERTY(meta=(BindWidget, AllowPrivateAccess="true"))
-    UCommonLazyImage* mDescriptionImage; // todo: why this is bound? does every option needs an image??
+    UCommonLazyImage* mDescriptionImage; // image for options that image is needed (maybe video options or HUD related examples)
 
     UPROPERTY(meta=(BindWidget, AllowPrivateAccess="true"))
     UCommonRichTextBlock* mDescription; // description for the setting - what generally this settings control

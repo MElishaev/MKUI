@@ -13,7 +13,7 @@ void UMKUI_OptionsDetailsPanel::updateDetailsPanelInfo(UMKUI_ListDataObjectBase*
         return;
     }
     
-    if (dataObj->getmSoftDescriptionImage()) {
+    if (!dataObj->getmSoftDescriptionImage().IsNull()) {
         mDescriptionImage->SetBrushFromLazyTexture(dataObj->getmSoftDescriptionImage());
         mDescriptionImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
     }
