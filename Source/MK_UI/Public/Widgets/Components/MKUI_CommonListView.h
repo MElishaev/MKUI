@@ -21,6 +21,8 @@ protected:
                                                        TSubclassOf<UUserWidget> DesiredEntryClass,
                                                        const TSharedRef<STableViewBase>& OwnerTable) override;
 
+    virtual bool OnIsSelectableOrNavigableInternal(UObject* FirstSelectedItem) override;
+
 private:
 #if WITH_EDITOR
     virtual void ValidateCompiledDefaults(IWidgetCompilerLog& compileLog) const override;

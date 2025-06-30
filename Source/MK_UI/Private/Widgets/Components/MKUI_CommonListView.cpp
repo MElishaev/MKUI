@@ -6,6 +6,7 @@
 #include "Widgets/Options/MKUI_DataListEntryMapping.h"
 #include "Widgets/Options/ListEntries/MKUI_ListEntryBase.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectBase.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 
 UUserWidget& UMKUI_CommonListView::OnGenerateEntryWidgetInternal(UObject* Item,
                                                                  TSubclassOf<UUserWidget> DesiredEntryClass,
@@ -21,6 +22,15 @@ UUserWidget& UMKUI_CommonListView::OnGenerateEntryWidgetInternal(UObject* Item,
     }
 
     return Super::OnGenerateEntryWidgetInternal(Item, DesiredEntryClass, OwnerTable);
+}
+
+bool UMKUI_CommonListView::OnIsSelectableOrNavigableInternal(UObject* FirstSelectedItem)
+{
+    // todo - is there another way to do that, more generic and not hardcoded to the DataObjectCollection?
+    //  maybe something like "isSelectable/isFocusable" or something?
+    // auto entry = GetEntryWidgetFromItem(FirstSelectedItem); // todo this method doesn't work in a manner of the first item that should be selectable isn't selected when tab is opened
+    // return entry ? entry->IsVisible() : Super::OnIsSelectableOrNavigableInternal(FirstSelectedItem);
+    return !FirstSelectedItem->IsA<UMKUI_ListDataObjectCollection>();
 }
 
 #if WITH_EDITOR

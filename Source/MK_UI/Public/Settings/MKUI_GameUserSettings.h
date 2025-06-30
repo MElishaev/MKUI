@@ -15,6 +15,9 @@ class MK_UI_API UMKUI_GameUserSettings : public UGameUserSettings
     GENERATED_BODY()
 
 public:
+
+    UMKUI_GameUserSettings();    
+    
     static UMKUI_GameUserSettings* getInstance();
 
     /******** Gameplay collection tab *********/
@@ -22,10 +25,26 @@ public:
     FString getmCurrentGameDifficulty() const { return mCurrentGameDifficulty; }
     UFUNCTION()
     void setmCurrentGameDifficulty(const FString& gameDifficulty) { mCurrentGameDifficulty = gameDifficulty; }
+    /******** Gameplay collection tab *********/
+
+    /******** Audio collection tab *********/
+    UFUNCTION()
+    float getOverallVolume() const { return mOverallVolume; }
+
+    UFUNCTION()
+    void setOverallVolume(float vol);
+    /******** Audio collection tab *********/
     
 private:
+    /******** Gameplay collection tab *********/
     // the config property makes this one of the game settings that is stored in the .ini
     // file and applied when the virtual function of  ApplySettings() is called
     UPROPERTY(Config)
     FString mCurrentGameDifficulty;
+    /******** Gameplay collection tab *********/
+
+    /******** Audio collection tab *********/
+    UPROPERTY(Config)
+    float mOverallVolume;    
+    /******** Audio collection tab *********/
 };

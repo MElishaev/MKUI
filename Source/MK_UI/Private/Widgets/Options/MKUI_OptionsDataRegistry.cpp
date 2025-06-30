@@ -8,6 +8,7 @@
 #include "Settings/MKUI_GameUserSettings.h"
 #include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectScalar.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
 
 #define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName) \
@@ -29,7 +30,34 @@ TArray<UMKUI_ListDataObjectBase*> UMKUI_OptionsDataRegistry::getListSourceItemsB
 
     checkf(tab, TEXT("No valid tab found with ID %s"), *tabId.ToString());
 
-    return (*tab)->getAllChildListData();
+    TArray<UMKUI_ListDataObjectBase*> allChildListItemsRecursive;
+    for (auto childListData : (*tab)->getAllChildListData()) {
+        if (childListData) {
+            allChildListItemsRecursive.Add(childListData);
+            if (childListData->hasAnyChildData()) {
+                findChildListDataRecursively(childListData, allChildListItemsRecursive);
+            }
+        }
+    }
+    
+    return allChildListItemsRecursive;
+}
+
+void UMKUI_OptionsDataRegistry::findChildListDataRecursively(UMKUI_ListDataObjectBase* parentData,
+                                                             TArray<UMKUI_ListDataObjectBase*>& foundChildren) const
+{
+    if (!parentData || !parentData->hasAnyChildData()) {
+        return;
+    }
+
+    for (auto subChildListData : parentData->getAllChildListData()) {
+        if (subChildListData) {
+            foundChildren.Add(subChildListData);
+            if (subChildListData->hasAnyChildData()) {
+                findChildListDataRecursively(subChildListData, foundChildren);
+            }
+        }
+    }
 }
 
 void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
@@ -85,12 +113,27 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
 
         audioTabCollection->addChildListData(volumeCategoryCollection);
 
-        // test item for category
+        // overall volume 
         {
-            auto testItem = NewObject<UMKUI_ListDataObjectString>();
-            testItem->setmDataId("testItem");
-            testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
-            volumeCategoryCollection->addChildListData(testItem);
+            auto overallVolume = NewObject<UMKUI_ListDataObjectScalar>();
+            overallVolume->setmDataId("overallVolume");
+            overallVolume->setmDataDisplayName(FText::FromString(TEXT("Overall Volume")));
+            overallVolume->setmDescriptionRichText(FText::FromString(TEXT("This is a description")));
+            overallVolume->setmDisplayValueRange(TRange<float>(0.f, 1.f));
+            overallVolume->setmOutputValueRange(TRange<float>(0.f, 2.f)); // not exactly understood why 2.f
+            overallVolume->setmSliderStepSize(0.01f);
+            overallVolume->setDefaultValueFromString(LexToString(1.f)); // this is 50% because the output value range is [0,2]
+            overallVolume->setmDisplayNumericType(ECommonNumericType::Percentage);
+            overallVolume->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
+
+            overallVolume->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getOverallVolume));
+            overallVolume->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setOverallVolume));
+
+            // todo - regarding this - this could lag the game when adjusting the slider and values are constantly written to file
+            //  need to do the update in a better way
+            overallVolume->setmbShouldApplySettingImmediately(true);
+            
+            volumeCategoryCollection->addChildListData(overallVolume);
         }
     }
 

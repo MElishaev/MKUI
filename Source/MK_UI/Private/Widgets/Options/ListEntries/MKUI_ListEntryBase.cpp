@@ -16,7 +16,6 @@ void UMKUI_ListEntryBase::nativeOnListEntryWidgetHovered(bool bHovered)
 void UMKUI_ListEntryBase::NativeOnListItemObjectSet(UObject* listItemObject)
 {
     IUserObjectListEntry::NativeOnListItemObjectSet(listItemObject);
-    SetVisibility(ESlateVisibility::Visible);
     onOwningListDataObjectSet(CastChecked<UMKUI_ListDataObjectBase>(listItemObject));
 }
 

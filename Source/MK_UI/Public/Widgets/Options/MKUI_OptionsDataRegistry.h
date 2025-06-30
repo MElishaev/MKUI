@@ -25,6 +25,8 @@ public:
     TArray<UMKUI_ListDataObjectBase*> getListSourceItemsBySelectedTabId(const FName tabId) const;
     
 private:
+    void findChildListDataRecursively(UMKUI_ListDataObjectBase* parentData, TArray<UMKUI_ListDataObjectBase*>& foundChildren) const;
+    
     void initGameplayCollectionTab();
     void initAudioCollectionTab();
     void initVideoCollectionTab();
