@@ -120,18 +120,17 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
             overallVolume->setmDataDisplayName(FText::FromString(TEXT("Overall Volume")));
             overallVolume->setmDescriptionRichText(FText::FromString(TEXT("This is a description")));
             overallVolume->setmDisplayValueRange(TRange<float>(0.f, 1.f));
-            overallVolume->setmOutputValueRange(TRange<float>(0.f, 2.f)); // not exactly understood why 2.f
+            // overallVolume->setmOutputValueRange(TRange<float>(0.f, 2.f)); // not exactly understood why 2.f
             overallVolume->setmSliderStepSize(0.01f);
-            overallVolume->setDefaultValueFromString(LexToString(1.f)); // this is 50% because the output value range is [0,2]
+            overallVolume->setDefaultValueFromString(LexToString(0.5f)); // this is 50% because the output value range is [0,2]
             overallVolume->setmDisplayNumericType(ECommonNumericType::Percentage);
             overallVolume->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
 
             overallVolume->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getOverallVolume));
             overallVolume->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setOverallVolume));
 
-            // todo - regarding this - this could lag the game when adjusting the slider and values are constantly written to file
-            //  need to do the update in a better way
-            overallVolume->setmbShouldApplySettingImmediately(true);
+            // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
+            overallVolume->setmbShouldApplySettingImmediately(false);
             
             volumeCategoryCollection->addChildListData(overallVolume);
         }

@@ -11,6 +11,8 @@ void UMKUI_ListEntryScalar::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     mSettingSlider->OnValueChanged.AddUniqueDynamic(this, &ThisClass::handleSliderValueChanged);
+    mSettingSlider->OnMouseCaptureBegin.AddUniqueDynamic(this, &ThisClass::handleSliderMouseCaptureBegin);
+    mSettingSlider->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::handleSliderMouseCaptureEnd); // todo this should trigger writing to file i think
 }
 
 void UMKUI_ListEntryScalar::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject)
@@ -41,5 +43,17 @@ void UMKUI_ListEntryScalar::handleSliderValueChanged(float value)
 {
     if (mCachedDataObject) {
         mCachedDataObject->setCurrentValueFromSlider(value);
+    }
+}
+
+void UMKUI_ListEntryScalar::handleSliderMouseCaptureBegin()
+{
+    selectThisEntryWidget();
+}
+
+void UMKUI_ListEntryScalar::handleSliderMouseCaptureEnd()
+{
+    if (mCachedDataObject) {
+        mCachedDataObject->handleSliderMouseCaptureEnd();
     }
 }

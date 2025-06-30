@@ -2,7 +2,6 @@
 
 
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectBase.h"
-
 #include "Settings/MKUI_GameUserSettings.h"
 
 void UMKUI_ListDataObjectBase::initDataObject()
@@ -18,4 +17,9 @@ void UMKUI_ListDataObjectBase::notifyDataModified(UMKUI_ListDataObjectBase* data
     if (mbShouldApplySettingImmediately) {
         UMKUI_GameUserSettings::getInstance()->ApplySettings(true);
     }
+}
+
+void UMKUI_ListDataObjectBase::applySettingsManually()
+{
+    UMKUI_GameUserSettings::getInstance()->ApplySettings(true);
 }

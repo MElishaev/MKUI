@@ -54,7 +54,7 @@ public:
                                     TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
                                     TFunction<void(EAsyncPushWidgetState, UMKUI_W_ActivatableBase*)> asyncPushStateCallback);
 
-    // todo - why to modal?
+    // Modal is the term for popup screens that take control over the background
     void pushConfirmScreenToModalStackAsync(EConfirmScreenType screenType,
                                             const FText& screenTitle,
                                             const FText& screenMsg,

@@ -67,13 +67,18 @@ protected:
     virtual void notifyDataModified(UMKUI_ListDataObjectBase* data,
                                     EOptionsListDataModifiedReason reason = EOptionsListDataModifiedReason::DirectlyModified);
 
+    void applySettingsManually();
+
 private:
     FName mDataId;
     FText mDataDisplayText; // todo: is this needed? why i have this and also in the string representing subclass also a displayText?? 
     FText mDescriptionRichText;
     FText mDisabledRichText; // displayed when a specific setting is disabled for example
     TSoftObjectPtr<UTexture2D> mSoftDescriptionImage;
-    bool mbShouldApplySettingImmediately = false;
+
+    // if true, all the setting values located in UMKUI_GameUserSettings written immediately to config file.
+    // should be careful with enabling it for values that can change every frame, like sliders
+    bool mbShouldApplySettingImmediately = false; 
 
     UPROPERTY(Transient)
     UMKUI_ListDataObjectBase* mParentData;
