@@ -113,3 +113,48 @@ bool UMKUI_ListDataObjectString::trySetCurrentTextFromStringValue(const FString&
     }
     return false;
 }
+
+/********************************************** STRING BOOL CLASS ***************************************************************/
+
+void UMKUI_ListDataObjectStringBool::overrideTrueDisplayText(const FText& newDisplayText)
+{
+    if (!mAvailableOptionsStrings.Contains(mTrueString)) {
+        addOptionValue(mTrueString, newDisplayText);
+    }
+}
+
+void UMKUI_ListDataObjectStringBool::overrideFalseDisplayText(const FText& newDisplayText)
+{
+    if (!mAvailableOptionsStrings.Contains(mFalseString)) {
+        addOptionValue(mFalseString, newDisplayText);
+    }
+}
+
+void UMKUI_ListDataObjectStringBool::setTrueAsDefaultValue()
+{
+    setDefaultValueFromString(mTrueString);
+}
+
+void UMKUI_ListDataObjectStringBool::setFalseAsDefaultValue()
+{
+    setDefaultValueFromString(mFalseString);
+}
+
+void UMKUI_ListDataObjectStringBool::onDataObjectInitialized()
+{
+    // this should be called before super because super depends on this when trying to set display text from string value
+    tryInitBoolValues();
+    
+    Super::onDataObjectInitialized();
+}
+
+void UMKUI_ListDataObjectStringBool::tryInitBoolValues()
+{
+    if (!mAvailableOptionsStrings.Contains(mTrueString)) {
+        addOptionValue(mTrueString, FText::FromString(TEXT("ON")));
+    }
+
+    if (!mAvailableOptionsStrings.Contains(mFalseString)) {
+        addOptionValue(mFalseString, FText::FromString(TEXT("OFF")));
+    }
+}

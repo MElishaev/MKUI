@@ -134,11 +134,87 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
             
             volumeCategoryCollection->addChildListData(overallVolume);
         }
+
+        // music volume
+        {
+            auto musicVolume = NewObject<UMKUI_ListDataObjectScalar>();
+            musicVolume->setmDataId("musicVolume");
+            musicVolume->setmDataDisplayName(FText::FromString(TEXT("Music Volume")));
+            musicVolume->setmDescriptionRichText(FText::FromString(TEXT("This is a description")));
+            musicVolume->setmDisplayValueRange(TRange<float>(0.f, 1.f));
+            musicVolume->setmSliderStepSize(0.01f);
+            musicVolume->setDefaultValueFromString(LexToString(0.5f));
+            musicVolume->setmDisplayNumericType(ECommonNumericType::Percentage);
+            musicVolume->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
+
+            musicVolume->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getMusicVolume));
+            musicVolume->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setMusicVolume));
+
+            // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
+            musicVolume->setmbShouldApplySettingImmediately(false);
+            
+            volumeCategoryCollection->addChildListData(musicVolume);
+        }
+
+        // SFX volume
+        {
+            auto sfxVolume = NewObject<UMKUI_ListDataObjectScalar>();
+            sfxVolume->setmDataId("musicVolume");
+            sfxVolume->setmDataDisplayName(FText::FromString(TEXT("Sound Effects Volume")));
+            sfxVolume->setmDescriptionRichText(FText::FromString(TEXT("This is a description")));
+            sfxVolume->setmDisplayValueRange(TRange<float>(0.f, 1.f));
+            sfxVolume->setmSliderStepSize(0.01f);
+            sfxVolume->setDefaultValueFromString(LexToString(0.5f));
+            sfxVolume->setmDisplayNumericType(ECommonNumericType::Percentage);
+            sfxVolume->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
+
+            sfxVolume->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getSFXVolume));
+            sfxVolume->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setSFXVolume));
+
+            // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
+            sfxVolume->setmbShouldApplySettingImmediately(false);
+            
+            volumeCategoryCollection->addChildListData(sfxVolume);
+        }
     }
 
     // sound category
     {
-        
+        auto soundCategory = NewObject<UMKUI_ListDataObjectCollection>();
+        soundCategory->setmDataId("soundCategory");
+        soundCategory->setmDataDisplayName(FText::FromString(TEXT("Sound")));
+
+        audioTabCollection->addChildListData(soundCategory);
+
+        // allow background audio
+        {
+            auto allowBackgroundAudio = NewObject<UMKUI_ListDataObjectStringBool>();
+            allowBackgroundAudio->setmDataId("allowBackgroundAudio");
+            allowBackgroundAudio->setmDataDisplayName(FText::FromString(TEXT("Allow Background Audio")));
+            allowBackgroundAudio->overrideTrueDisplayText(FText::FromString(TEXT("Enabled")));
+            allowBackgroundAudio->overrideFalseDisplayText(FText::FromString(TEXT("Disabled")));
+            allowBackgroundAudio->setFalseAsDefaultValue();
+            allowBackgroundAudio->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getAllowBackgroundAudio));
+            allowBackgroundAudio->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setAllowBackgroundAudio));
+            allowBackgroundAudio->setmbShouldApplySettingImmediately(true);
+
+            soundCategory->addChildListData(allowBackgroundAudio);
+        }
+
+        // use HDR audio
+        {
+            auto useHDRAudio = NewObject<UMKUI_ListDataObjectStringBool>();
+            useHDRAudio->setmDataId("useHDRAudio");
+            useHDRAudio->setmDataDisplayName(FText::FromString(TEXT("Use HDR Audio Mode")));
+            useHDRAudio->overrideTrueDisplayText(FText::FromString(TEXT("Enabled")));
+            useHDRAudio->overrideFalseDisplayText(FText::FromString(TEXT("Disabled")));
+            useHDRAudio->setFalseAsDefaultValue();
+            useHDRAudio->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getUseHDRAudioMode));
+            useHDRAudio->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setUseHDRAudioMode));
+            useHDRAudio->setmbShouldApplySettingImmediately(true);
+
+            soundCategory->addChildListData(useHDRAudio);
+        }
     }
     
     mRegisteredTabCollections.Add(audioTabCollection);

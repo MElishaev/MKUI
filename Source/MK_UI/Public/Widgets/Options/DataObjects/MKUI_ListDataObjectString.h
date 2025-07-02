@@ -42,3 +42,30 @@ protected:
     TArray<FText> mAvailableOptionsDisplayText; // the display texts of the option values 
 
 };
+
+
+UCLASS()
+class MK_UI_API UMKUI_ListDataObjectStringBool : public UMKUI_ListDataObjectString
+{
+    GENERATED_BODY()
+public:
+    /** use this when you want the "true/false" value to be displayed in other way than "ON" - like "Allow","Yes","Enable" etc.
+     * The override is called before this onDataObjectInitialized() is called, which is done after this data object is added
+     * to a specific collection using UMKUI_ListDataObjectCollection::addListDataObject() which triggers the initDataObject=>onDataObjectInitialized
+     */
+    void overrideTrueDisplayText(const FText& newDisplayText);
+    void overrideFalseDisplayText(const FText& newDisplayText);
+
+    void setTrueAsDefaultValue();
+    void setFalseAsDefaultValue();
+    
+protected:
+    virtual void onDataObjectInitialized() override;
+    
+private:
+    // this method will try to initialized the text options if not already overriden by the override methods before adding this instance to UMKUI_ListDataObjectCollection 
+    void tryInitBoolValues();
+    
+    const FString mTrueString = TEXT("true");
+    const FString mFalseString = TEXT("false");    
+};
