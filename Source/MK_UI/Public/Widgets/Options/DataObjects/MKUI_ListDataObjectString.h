@@ -69,3 +69,34 @@ private:
     const FString mTrueString = TEXT("true");
     const FString mFalseString = TEXT("false");    
 };
+
+
+UCLASS()
+class MK_UI_API UMKUI_ListDataObjectStringEnum : public UMKUI_ListDataObjectString
+{
+    GENERATED_BODY()
+public:
+
+    template<typename EnumType>
+    void addEnumOption(EnumType enumOption, const FText& optionDisplayText)
+    {
+        const UEnum* enumOptionClass = StaticEnum<EnumType>();
+        const FString convertedEnum = enumOptionClass->GetNameStringByValue(enumOption);
+        addOptionValue(convertedEnum, optionDisplayText);
+    }
+
+    template<typename EnumType>
+    EnumType getCurrentValueAsEnum() const
+    {
+        const UEnum* enumOptionClass = StaticEnum<EnumType>();
+        return static_cast<EnumType>(enumOptionClass->GetValueByNameString(mCurrentValueString));        
+    }
+
+    template<typename EnumType>
+    void setDefaultValueFromEnumOption(EnumType enumOption)
+    {
+        const UEnum* enumOptionClass = StaticEnum<EnumType>();
+        const FString convertedEnum = enumOptionClass->GetNameStringByValue(enumOption);
+        setDefaultValueFromString(convertedEnum);                
+    }
+};

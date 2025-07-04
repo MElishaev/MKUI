@@ -5,6 +5,7 @@
 
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Settings/MKUI_GameUserSettings.h"
 
 void AMKUI_PlayerController::OnPossess(APawn* InPawn)
 {
@@ -16,5 +17,12 @@ void AMKUI_PlayerController::OnPossess(APawn* InPawn)
     UGameplayStatics::GetAllActorsOfClassWithTag(this,  ACameraActor::StaticClass(), FName("default"), cameras);
     if (!cameras.IsEmpty()) {
         SetViewTarget(cameras[0]);
+    }
+
+    // run benchmark on startup if not already done to determine the default starting settings
+    auto settings = UMKUI_GameUserSettings::getInstance();
+    if (settings->GetLastCPUBenchmarkResult() == -1.f || settings->GetLastGPUBenchmarkResult() == -1.f) {
+        settings->RunHardwareBenchmark();
+        settings->ApplyHardwareBenchmarkResults();
     }
 }

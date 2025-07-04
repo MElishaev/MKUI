@@ -225,6 +225,33 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
     const auto videoTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     videoTabCollection->setmDataId(FName("videoTabCollection"));
     videoTabCollection->setmDataDisplayName(FText::FromString(TEXT("Video")));
+
+    // display category
+    {
+        auto displayCategory = NewObject<UMKUI_ListDataObjectCollection>();
+        displayCategory->setmDataId("displayCategory");
+        displayCategory->setmDataDisplayName(FText::FromString(TEXT("Display")));
+
+        videoTabCollection->addChildListData(displayCategory);
+
+        // window mode
+        {
+            auto windowMode = NewObject<UMKUI_ListDataObjectStringEnum>();
+            windowMode->setmDataId("windowMode");
+            windowMode->setmDataDisplayName(FText::FromString(TEXT("Fullscreen Mode")));
+            windowMode->setmDescriptionRichText(FText::FromString(TEXT("This is description for full screen option")));
+            windowMode->addEnumOption(EWindowMode::Fullscreen, FText::FromString(TEXT("Fullscreen")));
+            windowMode->addEnumOption(EWindowMode::Windowed, FText::FromString(TEXT("Windowed")));
+            windowMode->addEnumOption(EWindowMode::WindowedFullscreen, FText::FromString(TEXT("Borderless Window")));
+            windowMode->setDefaultValueFromEnumOption(EWindowMode::Fullscreen);
+            windowMode->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetFullscreenMode));
+            windowMode->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetFullscreenMode));
+            windowMode->setmbShouldApplySettingImmediately(true);
+
+            videoTabCollection->addChildListData(windowMode);
+        }
+    }
+    
     mRegisteredTabCollections.Add(videoTabCollection);
 }
 
