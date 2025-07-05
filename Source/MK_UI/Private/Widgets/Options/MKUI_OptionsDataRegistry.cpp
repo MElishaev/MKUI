@@ -10,6 +10,7 @@
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectScalar.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectStringResolution.h"
 
 #define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName) \
     MakeShared<MKUI_FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UMKUI_GameUserSettings, accessorFuncName))
@@ -243,12 +244,26 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             windowMode->addEnumOption(EWindowMode::Fullscreen, FText::FromString(TEXT("Fullscreen")));
             windowMode->addEnumOption(EWindowMode::Windowed, FText::FromString(TEXT("Windowed")));
             windowMode->addEnumOption(EWindowMode::WindowedFullscreen, FText::FromString(TEXT("Borderless Window")));
-            windowMode->setDefaultValueFromEnumOption(EWindowMode::Fullscreen);
+            windowMode->setDefaultValueFromEnumOption(EWindowMode::WindowedFullscreen);
             windowMode->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetFullscreenMode));
             windowMode->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetFullscreenMode));
             windowMode->setmbShouldApplySettingImmediately(true);
 
-            videoTabCollection->addChildListData(windowMode);
+            displayCategory->addChildListData(windowMode);
+        }
+
+        // screen resolution
+        {
+            auto screenResolution = NewObject<UMKUI_ListDataObjectStringResolution>();
+            screenResolution->setmDataId("screenResolution");
+            screenResolution->setmDataDisplayName(FText::FromString(TEXT("Screen Resolution")));
+            screenResolution->setmDescriptionRichText(FText::FromString(TEXT("This is description for resolution option")));
+            screenResolution->initScreenResolutionOption();
+            screenResolution->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetScreenResolution));
+            screenResolution->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetScreenResolution));
+            screenResolution->setmbShouldApplySettingImmediately(true);
+
+            displayCategory->addChildListData(screenResolution);
         }
     }
     
