@@ -104,6 +104,21 @@ bool UMKUI_ListDataObjectString::tryResetBackToDefaultValue()
     return false;
 }
 
+bool UMKUI_ListDataObjectString::canSetToForcedStringValue(const FString& value) const
+{
+    return mCurrentValueString != value;
+}
+
+void UMKUI_ListDataObjectString::onSetToForcedStringValue(const FString& value)
+{
+    mCurrentValueString = value;
+    trySetCurrentTextFromStringValue(mCurrentValueString);
+    if (mDataDynamicSetter) {
+        mDataDynamicSetter->setValueFromString(mCurrentValueString);
+        notifyDataModified(this, EOptionsListDataModifiedReason::DependencyModified);
+    }
+}
+
 bool UMKUI_ListDataObjectString::trySetCurrentTextFromStringValue(const FString& stringVal)
 {
     const auto index = mAvailableOptionsStrings.IndexOfByKey(stringVal);

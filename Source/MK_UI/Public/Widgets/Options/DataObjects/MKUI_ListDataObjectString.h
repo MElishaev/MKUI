@@ -30,6 +30,8 @@ protected:
     virtual void onDataObjectInitialized() override;
     virtual bool canResetBackToDefaultValue() const override;
     virtual bool tryResetBackToDefaultValue() override;
+    virtual bool canSetToForcedStringValue(const FString& value) const override;
+    virtual void onSetToForcedStringValue(const FString& value) override;
 
     bool trySetCurrentTextFromStringValue(const FString& stringVal);
     

@@ -52,11 +52,33 @@ void UMKUI_ListEntryBase::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* li
     if (!listDataObject->onListDataModified.IsBoundToObject(this)) {
         listDataObject->onListDataModified.AddUObject(this, &ThisClass::onOwningListDataObjectModified);
     }
+
+    if (!listDataObject->onDependencyDataModified.IsBoundToObject(this)) {
+        listDataObject->onDependencyDataModified.AddUObject(this, &ThisClass::handleDependencyDataModified);
+    }
+    
+    onToggleEditableState(listDataObject->isDataEditable());
+
+    mCachedOwningDataObject = listDataObject;
 }
 
 void UMKUI_ListEntryBase::onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
 {
     // empty in base class
+}
+
+void UMKUI_ListEntryBase::onToggleEditableState(bool bIsEditable)
+{
+    if (mSettingDisplayName) {
+        mSettingDisplayName->SetIsEnabled(bIsEditable);
+    }
+}
+
+void UMKUI_ListEntryBase::handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency, EOptionsListDataModifiedReason reason)
+{
+    if (mCachedOwningDataObject) {
+        onToggleEditableState(mCachedOwningDataObject->isDataEditable());
+    }
 }
 
 void UMKUI_ListEntryBase::selectThisEntryWidget()

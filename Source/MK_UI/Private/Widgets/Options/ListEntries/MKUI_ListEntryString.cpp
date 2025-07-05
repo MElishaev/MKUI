@@ -25,6 +25,15 @@ void UMKUI_ListEntryString::onOwningListDataObjectModified(UMKUI_ListDataObjectB
     }
 }
 
+void UMKUI_ListEntryString::onToggleEditableState(bool bIsEditable)
+{
+    Super::onToggleEditableState(bIsEditable);
+
+    mButtonNext->SetIsEnabled(bIsEditable);
+    mButtonPrev->SetIsEnabled(bIsEditable);
+    mOptionsRotator->SetIsEnabled(bIsEditable);
+}
+
 void UMKUI_ListEntryString::NativeOnInitialized()
 {
     Super::NativeOnInitialized();

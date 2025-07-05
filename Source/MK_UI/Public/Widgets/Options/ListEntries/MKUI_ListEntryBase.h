@@ -47,6 +47,13 @@ protected:
     // Child class should override this method to implement the modification of what that widget displays
     virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason);
 
+    // child class should override to control the editable state of the widget he owns - a super call is expected
+    virtual void onToggleEditableState(bool bIsEditable);
+
+    // handles enabled state of this entry widget when dependency data modified
+    virtual void handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency,
+                                              EOptionsListDataModifiedReason reason);
+    
     /**
      * This method comes to implement the selection of this widget no matter what was pressed on on this widget,
      * the text, the buttons, the rotator... I don't know why this matters because the selection is only visual
@@ -58,4 +65,7 @@ private:
     UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"))
     UCommonTextBlock* mSettingDisplayName;
     /******** bound widgets **********/
+
+    UPROPERTY(Transient)
+    UMKUI_ListDataObjectBase* mCachedOwningDataObject; // the data object this entry widget represents to the user
 };

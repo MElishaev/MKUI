@@ -16,7 +16,7 @@ class MK_UI_API UMKUI_ListDataObjectStringResolution : public UMKUI_ListDataObje
 
 public:
     void initScreenResolutionOption();
-
+    FORCEINLINE FString getmMaxResolutionSupported() const { return mMaxResolutionSupported; }
 protected:
     virtual void onDataObjectInitialized() override;
 

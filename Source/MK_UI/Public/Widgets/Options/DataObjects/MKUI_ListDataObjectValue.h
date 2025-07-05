@@ -24,8 +24,8 @@ public:
     virtual bool hasDefaultValue() const override { return mDefaultStringValue.IsSet(); };
     
 protected:
-    /* Below members store the path to the getters and setters for the value of
-     * the settings option represented by the child classes */
+    /* Below members store the path to the getters and setters for the value in the "Game Settings" class
+     * which role is to store the modified values in config file and apply the settings in game */
     TSharedPtr<MKUI_FOptionsDataInteractionHelper> mDataDynamicGetter;
     TSharedPtr<MKUI_FOptionsDataInteractionHelper> mDataDynamicSetter;
     

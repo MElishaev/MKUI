@@ -22,7 +22,7 @@ void UMKUI_OptionsDetailsPanel::updateDetailsPanelInfo(UMKUI_ListDataObjectBase*
     }
     mDescription->SetText(dataObj->getmDescriptionRichText());
     mTitle->SetText(dataObj->getmDataDisplayName());
-    mDisabledReason->SetText(dataObj->getmDisabledRichText());
+    mDisabledReason->SetText(dataObj->isDataEditable() ? FText::GetEmpty() : dataObj->getmDisabledRichText());
 
     const FString dynamicDetails = FString::Printf(
         TEXT("Data Object Class: <Bold>%s</>\n"

@@ -227,6 +227,8 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
     videoTabCollection->setmDataId(FName("videoTabCollection"));
     videoTabCollection->setmDataDisplayName(FText::FromString(TEXT("Video")));
 
+    UMKUI_ListDataObjectStringEnum* windowMode = nullptr; // in this scope because we need to use it for edit condition of screen resolution
+    
     // display category
     {
         auto displayCategory = NewObject<UMKUI_ListDataObjectCollection>();
@@ -235,9 +237,16 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
         videoTabCollection->addChildListData(displayCategory);
 
+        // created edit conditions
+        FOptionsDataEditConditionDescriptor packagedOnlyBuildCondition;
+        packagedOnlyBuildCondition.setmEditConditionFunc([]() {
+            return !(GIsEditor || GIsPlayInEditorWorld); // returns true only if packaged build  
+        });
+        packagedOnlyBuildCondition.setmDisabledRichStringReason(TEXT("<Disabled>This condition is modifyable only in packaged builds</>"));
+        
         // window mode
         {
-            auto windowMode = NewObject<UMKUI_ListDataObjectStringEnum>();
+            windowMode = NewObject<UMKUI_ListDataObjectStringEnum>();
             windowMode->setmDataId("windowMode");
             windowMode->setmDataDisplayName(FText::FromString(TEXT("Fullscreen Mode")));
             windowMode->setmDescriptionRichText(FText::FromString(TEXT("This is description for full screen option")));
@@ -248,6 +257,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             windowMode->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetFullscreenMode));
             windowMode->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetFullscreenMode));
             windowMode->setmbShouldApplySettingImmediately(true);
+            windowMode->addEditCondition(packagedOnlyBuildCondition);
 
             displayCategory->addChildListData(windowMode);
         }
@@ -262,6 +272,19 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             screenResolution->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetScreenResolution));
             screenResolution->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetScreenResolution));
             screenResolution->setmbShouldApplySettingImmediately(true);
+            screenResolution->addEditCondition(packagedOnlyBuildCondition);
+
+            // add window mode condition
+            FOptionsDataEditConditionDescriptor windowModeCondition;
+            windowModeCondition.setmEditConditionFunc([windowMode]() {
+                // screen resolution is editable if not set to borderless window
+                return (windowMode->getCurrentValueAsEnum<EWindowMode::Type>() != EWindowMode::WindowedFullscreen);
+            });
+            windowModeCondition.setmDisabledRichStringReason(TEXT("\n<Disabled>Screen resolution isn't modifyable when set to borderless window</>"));
+            windowModeCondition.setmDisabledForcedStringValue(screenResolution->getmMaxResolutionSupported());
+            screenResolution->addEditCondition(windowModeCondition);
+
+            screenResolution->addDataDependency(windowMode);
 
             displayCategory->addChildListData(screenResolution);
         }

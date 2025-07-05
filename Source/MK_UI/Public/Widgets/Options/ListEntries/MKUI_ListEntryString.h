@@ -20,7 +20,8 @@ class MK_UI_API UMKUI_ListEntryString : public UMKUI_ListEntryBase
 protected:
     virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject) override;
     virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
-
+    virtual void onToggleEditableState(bool bIsEditable) override;
+    
     virtual void NativeOnInitialized() override;
     
 private:

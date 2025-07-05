@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MKUITypes/MKUIEnumTypes.h"
+#include "MKUITypes/MKUI_StructTypes.h"
 #include "UObject/Object.h"
 #include "MKUI_ListDataObjectBase.generated.h"
 
@@ -21,6 +22,7 @@ public:
     // todo: could this be done with MVVM instead of delegate bindings?
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnListDataModified, UMKUI_ListDataObjectBase*, EOptionsListDataModifiedReason);
     FOnListDataModified onListDataModified;
+    FOnListDataModified onDependencyDataModified;
 
     void initDataObject();
 
@@ -59,6 +61,11 @@ public:
     // if canResetBackToDefaultValue() returns true - this method will set the value to default, update the UI, and notify to store in config file
     virtual bool tryResetBackToDefaultValue() { return false; }
 
+    void addEditCondition(const FOptionsDataEditConditionDescriptor& editCondition);
+    bool isDataEditable();
+    
+    // used to add other data object that this object should depend on
+    void addDataDependency(UMKUI_ListDataObjectBase* dataDependency);
 protected:
     // empty in base class. should be overriden by child classes for initialization
     virtual void onDataObjectInitialized() {};
@@ -67,6 +74,13 @@ protected:
     virtual void notifyDataModified(UMKUI_ListDataObjectBase* data,
                                     EOptionsListDataModifiedReason reason = EOptionsListDataModifiedReason::DirectlyModified);
 
+    // parent class returns false by default - child classes should override these function
+    virtual bool canSetToForcedStringValue(const FString& value) const { return false; };
+    virtual void onSetToForcedStringValue(const FString& value) {};
+
+    virtual void handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency,
+                                              EOptionsListDataModifiedReason reason);
+    
     void applySettingsManually();
 
 private:
@@ -82,4 +96,7 @@ private:
 
     UPROPERTY(Transient)
     UMKUI_ListDataObjectBase* mParentData;
+    
+    UPROPERTY(Transient)
+    TArray<FOptionsDataEditConditionDescriptor> mEditConditions; // stores the conditions that needs to be met to edit this entry option
 };
