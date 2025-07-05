@@ -31,7 +31,7 @@ void UMKUI_ListEntryScalar::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* 
     mSettingSlider->SetValue(mCachedDataObject->getCurrentValue());
 }
 
-void UMKUI_ListEntryScalar::onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
+void UMKUI_ListEntryScalar::handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
 {
     if (mCachedDataObject) {
         mSettingValue->SetCurrentValue(mCachedDataObject->getCurrentValue());

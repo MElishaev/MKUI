@@ -21,7 +21,7 @@ class MK_UI_API UMKUI_ListEntryScalar : public UMKUI_ListEntryBase
 protected:
     virtual void NativeOnInitialized() override;
     virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject) override;
-    virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
+    virtual void handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
     
 private:
     UFUNCTION()
@@ -42,5 +42,5 @@ private:
     /************** Bound widgets ****************/
 
     UPROPERTY(Transient)
-    UMKUI_ListDataObjectScalar* mCachedDataObject;
+    UMKUI_ListDataObjectScalar* mCachedDataObject; // the data object represented by this list entry
 };

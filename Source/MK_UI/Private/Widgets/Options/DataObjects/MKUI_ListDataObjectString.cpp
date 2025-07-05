@@ -60,7 +60,7 @@ void UMKUI_ListDataObjectString::onRotatorInitiatedValueChange(const FText& newS
             mDataDynamicSetter->setValueFromString(mCurrentValueString);
             notifyDataModified(this);
         }
-    } 
+    }
 }
 
 void UMKUI_ListDataObjectString::onDataObjectInitialized()
@@ -78,8 +78,7 @@ void UMKUI_ListDataObjectString::onDataObjectInitialized()
     if (mDataDynamicGetter && !mDataDynamicGetter->getValueAsString().IsEmpty()) {
         mCurrentValueString = mDataDynamicGetter->getValueAsString();
     }
-
-
+    
     if (!trySetCurrentTextFromStringValue(mCurrentValueString)) {
         mCurrentDisplayText = FText::FromString(TEXT("Invalid Option"));
     }
@@ -159,7 +158,7 @@ void UMKUI_ListDataObjectStringBool::onDataObjectInitialized()
 {
     // this should be called before super because super depends on this when trying to set display text from string value
     tryInitBoolValues();
-    
+
     Super::onDataObjectInitialized();
 }
 
@@ -172,4 +171,41 @@ void UMKUI_ListDataObjectStringBool::tryInitBoolValues()
     if (!mAvailableOptionsStrings.Contains(mFalseString)) {
         addOptionValue(mFalseString, FText::FromString(TEXT("OFF")));
     }
+}
+
+
+/********************************************** STRING INTEGER CLASS ***************************************************************/
+
+void UMKUI_ListDataObjectStringInteger::addIntegerOption(int32 val, const FText& displayText)
+{
+    addOptionValue(LexToString(val), displayText);
+}
+
+void UMKUI_ListDataObjectStringInteger::onDataObjectInitialized()
+{
+    Super::onDataObjectInitialized();
+
+    if (!trySetCurrentTextFromStringValue(mCurrentValueString)) {
+        mCurrentDisplayText = FText::FromString(TEXT("Custom"));
+    }
+}
+
+void UMKUI_ListDataObjectStringInteger::handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency,
+                                                                     EOptionsListDataModifiedReason reason)
+{
+    if (mDataDynamicGetter) {
+        // if dependency change (e.g. "overall quality" change to EPIC) then this dependent data object should
+        // change to the same value. NOTE:::: it seems like this will work only for specifically the overall
+        // quality setting because this UE setting internally encapsulates and modifies all associated values to it.
+        // this means that using here below the getter will give us the correct value because it was changed by
+        // changing the overall quality, but for other dependencies, this needs to be manually implemented.
+        // like in the screen resolution and window mode.
+        mCurrentValueString = mDataDynamicGetter->getValueAsString();
+        if (!trySetCurrentTextFromStringValue(mCurrentValueString)) {
+            mCurrentDisplayText = FText::FromString(TEXT("Custom"));
+        }
+
+        notifyDataModified(this, reason);
+    }
+    Super::handleDependencyDataModified(modifiedDependency, reason); // call super for broadcasting the change to the UI entry widget
 }

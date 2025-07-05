@@ -10,7 +10,6 @@ float UMKUI_ListDataObjectScalar::getCurrentValue() const
         return FMath::GetMappedRangeValueClamped(mOutputValueRange,
                                                  mDisplayValueRange,
                                                  stringToFloat(mDataDynamicGetter->getValueAsString()));
-        // return stringToFloat(mDataDynamicGetter->getValueAsString());
     }
     return 0.f;
 }
@@ -19,9 +18,8 @@ void UMKUI_ListDataObjectScalar::setCurrentValueFromSlider(float val)
 {
     if (mDataDynamicSetter) {
         const float clampedVal = FMath::GetMappedRangeValueClamped(mDisplayValueRange, mOutputValueRange, val);
-        // const float clampedVal = FMath::Clamp(val, mDisplayValueRange.GetLowerBoundValue(), mDisplayValueRange.GetUpperBoundValue());
         mDataDynamicSetter->setValueFromString(LexToString(clampedVal));
-        notifyDataModified(this); // todo- the notify here should be moved to the event where mouse capture of slider end 
+        notifyDataModified(this); 
     }
 }
 
@@ -70,4 +68,12 @@ bool UMKUI_ListDataObjectScalar::tryResetBackToDefaultValue()
         return true;
     }
     return false;
+}
+
+void UMKUI_ListDataObjectScalar::handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency,
+                                                              EOptionsListDataModifiedReason reason)
+{
+    notifyDataModified(this, EOptionsListDataModifiedReason::DependencyModified);
+    
+    Super::handleDependencyDataModified(modifiedDependency, reason);
 }

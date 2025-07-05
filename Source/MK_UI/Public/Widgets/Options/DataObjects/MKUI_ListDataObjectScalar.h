@@ -38,6 +38,7 @@ private:
     float stringToFloat(const FString& str) const;
     virtual bool canResetBackToDefaultValue() const override;
     virtual bool tryResetBackToDefaultValue() override;
+    virtual void handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency, EOptionsListDataModifiedReason reason) override;
 
     
     TRange<float> mDisplayValueRange = TRange<float>(0.f, 1.f); // range to display for the user

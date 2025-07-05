@@ -50,7 +50,7 @@ void UMKUI_ListEntryBase::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* li
     }
 
     if (!listDataObject->onListDataModified.IsBoundToObject(this)) {
-        listDataObject->onListDataModified.AddUObject(this, &ThisClass::onOwningListDataObjectModified);
+        listDataObject->onListDataModified.AddUObject(this, &ThisClass::handleOwningListDataObjectModified);
     }
 
     if (!listDataObject->onDependencyDataModified.IsBoundToObject(this)) {
@@ -62,7 +62,7 @@ void UMKUI_ListEntryBase::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* li
     mCachedOwningDataObject = listDataObject;
 }
 
-void UMKUI_ListEntryBase::onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
+void UMKUI_ListEntryBase::handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
 {
     // empty in base class
 }

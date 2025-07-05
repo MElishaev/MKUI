@@ -21,9 +21,10 @@ class MK_UI_API UMKUI_ListDataObjectBase : public UObject
 public:
     // todo: could this be done with MVVM instead of delegate bindings?
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnListDataModified, UMKUI_ListDataObjectBase*, EOptionsListDataModifiedReason);
-    FOnListDataModified onListDataModified;
-    FOnListDataModified onDependencyDataModified;
+    FOnListDataModified onListDataModified; // delegate that broadcast when this data object's data modified
+    FOnListDataModified onDependencyDataModified; // delegate that broadcast when a dependency of this data object's data is modified
 
+    // dispatches the call for specific initialization done by child class
     void initDataObject();
 
     // empty in the base class. Child class should override it and return all child data a tab has
@@ -64,7 +65,7 @@ public:
     void addEditCondition(const FOptionsDataEditConditionDescriptor& editCondition);
     bool isDataEditable();
     
-    // used to add other data object that this object should depend on
+    // used to add other data object that this object should depend on such that if the dependency changes it should affect this data object
     void addDataDependency(UMKUI_ListDataObjectBase* dataDependency);
 protected:
     // empty in base class. should be overriden by child classes for initialization
@@ -78,6 +79,7 @@ protected:
     virtual bool canSetToForcedStringValue(const FString& value) const { return false; };
     virtual void onSetToForcedStringValue(const FString& value) {};
 
+    // logic that handles the effect of dependency data modified - overriden by child classes
     virtual void handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency,
                                               EOptionsListDataModifiedReason reason);
     

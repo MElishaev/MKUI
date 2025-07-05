@@ -315,6 +315,44 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             
             graphicsCategory->addChildListData(gamma);
         }
+
+        // overall quality
+        UMKUI_ListDataObjectStringInteger* overallQuality = nullptr;
+        {
+            overallQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            overallQuality->setmDataId("overallQuality");
+            overallQuality->setmDataDisplayName(FText::FromString(TEXT("Overall Quality")));
+            overallQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the overall quality of the game.")));
+            overallQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            overallQuality->addIntegerOption(1, FText::FromString(TEXT("Normal")));
+            overallQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            overallQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            overallQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            overallQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetOverallScalabilityLevel));
+            overallQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetOverallScalabilityLevel));
+            overallQuality->setmbShouldApplySettingImmediately(true);
+            
+            graphicsCategory->addChildListData(overallQuality);
+        }
+
+        // resolution scale
+        {
+            auto resolutionScale = NewObject<UMKUI_ListDataObjectScalar>();
+            resolutionScale->setmDataId("resolutionScale");
+            resolutionScale->setmDataDisplayName(FText::FromString(TEXT("3D Resolution")));
+            resolutionScale->setmDescriptionRichText(FText::FromString(TEXT("Controls quality of rendered objects in game.")));
+            resolutionScale->setmDisplayValueRange(TRange<float>(0.f, 1.f));
+            resolutionScale->setmOutputValueRange(TRange<float>(0.f, 1.f));
+            resolutionScale->setmDisplayNumericType(ECommonNumericType::Percentage);
+            resolutionScale->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
+            resolutionScale->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetResolutionScaleNormalized));
+            resolutionScale->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetResolutionScaleNormalized));
+            resolutionScale->setmbShouldApplySettingImmediately(true);
+
+            resolutionScale->addDataDependency(overallQuality);
+            
+            graphicsCategory->addChildListData(resolutionScale);
+        }
     }
     
     mRegisteredTabCollections.Add(videoTabCollection);

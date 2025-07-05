@@ -18,7 +18,7 @@ void UMKUI_ListEntryString::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* 
     mOptionsRotator->setSelectedOptionByText(mOwningListDataObject->getmCurrentDisplayText());
 }
 
-void UMKUI_ListEntryString::onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
+void UMKUI_ListEntryString::handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason)
 {
     if (mOwningListDataObject) {
         mOptionsRotator->setSelectedOptionByText(mOwningListDataObject->getmCurrentDisplayText());

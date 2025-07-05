@@ -27,6 +27,7 @@ public:
     FORCEINLINE const TArray<FText>& getmAvailableOptionsDisplayText() const { return mAvailableOptionsDisplayText; }
     FORCEINLINE FText getmCurrentDisplayText() const { return mCurrentDisplayText; }
 protected:
+    // setting the default value and display text if available
     virtual void onDataObjectInitialized() override;
     virtual bool canResetBackToDefaultValue() const override;
     virtual bool tryResetBackToDefaultValue() override;
@@ -101,4 +102,18 @@ public:
         const FString convertedEnum = enumOptionClass->GetNameStringByValue(enumOption);
         setDefaultValueFromString(convertedEnum);                
     }
+};
+
+
+UCLASS()
+class MK_UI_API UMKUI_ListDataObjectStringInteger : public UMKUI_ListDataObjectString
+{
+    GENERATED_BODY()
+
+public:
+    void addIntegerOption(int32 val, const FText& displayText);
+
+protected:
+    virtual void onDataObjectInitialized() override;
+    virtual void handleDependencyDataModified(UMKUI_ListDataObjectBase* modifiedDependency, EOptionsListDataModifiedReason reason) override;
 };

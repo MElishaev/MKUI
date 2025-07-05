@@ -45,7 +45,7 @@ protected:
     virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject);
 
     // Child class should override this method to implement the modification of what that widget displays
-    virtual void onOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason);
+    virtual void handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason);
 
     // child class should override to control the editable state of the widget he owns - a super call is expected
     virtual void onToggleEditableState(bool bIsEditable);
