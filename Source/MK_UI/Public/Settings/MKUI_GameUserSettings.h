@@ -56,7 +56,14 @@ public:
     UFUNCTION()
     void setUseHDRAudioMode(bool bIsAllowed);
     /******** Audio collection tab *********/
-    
+
+    /******** Video collection tab *********/
+    UFUNCTION()
+    float getGamma() const;
+    UFUNCTION()
+    void setGamma(float val);
+    /******** Video collection tab *********/
+
 private:
     /******** Gameplay collection tab *********/
     // the config property makes this one of the game settings that is stored in the .ini
@@ -77,4 +84,10 @@ private:
     UPROPERTY(Config)
     bool mbUseHDRAudioMode;
     /******** Audio collection tab *********/
+
+    /******** Video collection tab *********/
+    UPROPERTY(Config)
+    float mGamma;
+    /******** Video collection tab *********/
+
 };

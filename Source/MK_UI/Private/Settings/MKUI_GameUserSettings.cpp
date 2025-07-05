@@ -4,8 +4,8 @@
 #include "Settings/MKUI_GameUserSettings.h"
 
 UMKUI_GameUserSettings::UMKUI_GameUserSettings() :
-    mOverallVolume(0.5f),
-    mMusicVolume(0.5f), mSFXVolume(0.5f), mbAllowBackgroundAudio(true), mbUseHDRAudioMode(false)
+    mOverallVolume(1.f),
+    mMusicVolume(1.f), mSFXVolume(1.f), mbAllowBackgroundAudio(true), mbUseHDRAudioMode(false)
 {
 
 }
@@ -47,4 +47,19 @@ void UMKUI_GameUserSettings::setUseHDRAudioMode(bool bIsAllowed)
 {
     mbUseHDRAudioMode = bIsAllowed;
     // todo: the actual logic to control the volume in game goes here
+}
+
+float UMKUI_GameUserSettings::getGamma() const
+{
+    if (GEngine) {
+        return GEngine->GetDisplayGamma();
+    }
+    return 0.f;
+}
+
+void UMKUI_GameUserSettings::setGamma(float val)
+{
+    if (GEngine) {
+        GEngine->DisplayGamma = val;
+    }
 }
