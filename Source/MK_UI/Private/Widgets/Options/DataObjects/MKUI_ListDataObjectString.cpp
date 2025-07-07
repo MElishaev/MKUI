@@ -194,6 +194,9 @@ void UMKUI_ListDataObjectStringInteger::handleDependencyDataModified(UMKUI_ListD
                                                                      EOptionsListDataModifiedReason reason)
 {
     if (mDataDynamicGetter) {
+        if (mCurrentValueString == mDataDynamicGetter->getValueAsString()) {
+            return;
+        }
         // if dependency change (e.g. "overall quality" change to EPIC) then this dependent data object should
         // change to the same value. NOTE:::: it seems like this will work only for specifically the overall
         // quality setting because this UE setting internally encapsulates and modifies all associated values to it.

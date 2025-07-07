@@ -324,7 +324,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             overallQuality->setmDataDisplayName(FText::FromString(TEXT("Overall Quality")));
             overallQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the overall quality of the game.")));
             overallQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
-            overallQuality->addIntegerOption(1, FText::FromString(TEXT("Normal")));
+            overallQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
             overallQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
             overallQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
             overallQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
@@ -347,11 +347,179 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             resolutionScale->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
             resolutionScale->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetResolutionScaleNormalized));
             resolutionScale->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetResolutionScaleNormalized));
-            resolutionScale->setmbShouldApplySettingImmediately(true);
+            resolutionScale->setmbShouldApplySettingImmediately(false);
 
             resolutionScale->addDataDependency(overallQuality);
             
             graphicsCategory->addChildListData(resolutionScale);
+        }
+
+        // global illumination
+        {
+            auto globalIllumination = NewObject<UMKUI_ListDataObjectStringInteger>();
+            globalIllumination->setmDataId("globalIllumination");
+            globalIllumination->setmDataDisplayName(FText::FromString(TEXT("Global Illumination")));
+            globalIllumination->setmDescriptionRichText(FText::FromString(TEXT("Controls the global illumination.")));
+            globalIllumination->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            globalIllumination->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            globalIllumination->addIntegerOption(2, FText::FromString(TEXT("High")));
+            globalIllumination->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            globalIllumination->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            globalIllumination->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetGlobalIlluminationQuality));
+            globalIllumination->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetGlobalIlluminationQuality));
+            globalIllumination->setmbShouldApplySettingImmediately(true);
+
+            globalIllumination->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(globalIllumination);
+            
+            graphicsCategory->addChildListData(globalIllumination);
+        }
+
+        // shadow quality
+        {
+            auto shadowQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            shadowQuality->setmDataId("shadowQuality");
+            shadowQuality->setmDataDisplayName(FText::FromString(TEXT("Shadow Quality")));
+            shadowQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the shadow quality.")));
+            shadowQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            shadowQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            shadowQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            shadowQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            shadowQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            shadowQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetShadingQuality));
+            shadowQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetShadowQuality));
+            shadowQuality->setmbShouldApplySettingImmediately(true);
+
+            shadowQuality->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(shadowQuality);
+            
+            graphicsCategory->addChildListData(shadowQuality);
+        }
+        
+        // anti aliasing
+        {
+            auto antiAliasing = NewObject<UMKUI_ListDataObjectStringInteger>();
+            antiAliasing->setmDataId("antiAliasing");
+            antiAliasing->setmDataDisplayName(FText::FromString(TEXT("Anti Aliasing Quality")));
+            antiAliasing->setmDescriptionRichText(FText::FromString(TEXT("Controls the anti aliasing quality.")));
+            antiAliasing->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            antiAliasing->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            antiAliasing->addIntegerOption(2, FText::FromString(TEXT("High")));
+            antiAliasing->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            antiAliasing->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            antiAliasing->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetAntiAliasingQuality));
+            antiAliasing->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetAntiAliasingQuality));
+            antiAliasing->setmbShouldApplySettingImmediately(true);
+
+            antiAliasing->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(antiAliasing);
+            
+            graphicsCategory->addChildListData(antiAliasing);
+        }
+
+        // distance view quality
+        {
+            auto viewDistance = NewObject<UMKUI_ListDataObjectStringInteger>();
+            viewDistance->setmDataId("viewDistance");
+            viewDistance->setmDataDisplayName(FText::FromString(TEXT("View Distance Quality")));
+            viewDistance->setmDescriptionRichText(FText::FromString(TEXT("Controls the view distance.")));
+            viewDistance->addIntegerOption(0, FText::FromString(TEXT("Near")));
+            viewDistance->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            viewDistance->addIntegerOption(2, FText::FromString(TEXT("Far")));
+            viewDistance->addIntegerOption(3, FText::FromString(TEXT("Very Far")));
+            viewDistance->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            viewDistance->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetViewDistanceQuality));
+            viewDistance->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetViewDistanceQuality));
+            viewDistance->setmbShouldApplySettingImmediately(true);
+
+            viewDistance->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(viewDistance);
+            
+            graphicsCategory->addChildListData(viewDistance);
+        }
+
+        // texture quality
+        {
+            auto textureQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            textureQuality->setmDataId("textureQuality");
+            textureQuality->setmDataDisplayName(FText::FromString(TEXT("Texture Quality")));
+            textureQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the texture quality.")));
+            textureQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            textureQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            textureQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            textureQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            textureQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            textureQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetTextureQuality));
+            textureQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetTextureQuality));
+            textureQuality->setmbShouldApplySettingImmediately(true);
+
+            textureQuality->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(textureQuality);
+            
+            graphicsCategory->addChildListData(textureQuality);
+        }
+
+        // VFX quality
+        {
+            auto vfxQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            vfxQuality->setmDataId("vfxQuality");
+            vfxQuality->setmDataDisplayName(FText::FromString(TEXT("Visual Effects Quality")));
+            vfxQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the VFX quality.")));
+            vfxQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            vfxQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            vfxQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            vfxQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            vfxQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            vfxQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetVisualEffectQuality));
+            vfxQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetVisualEffectQuality));
+            vfxQuality->setmbShouldApplySettingImmediately(true);
+
+            vfxQuality->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(vfxQuality);
+            
+            graphicsCategory->addChildListData(vfxQuality);
+        }
+
+        // reflections quality
+        {
+            auto reflectionsQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            reflectionsQuality->setmDataId("reflectionsQuality");
+            reflectionsQuality->setmDataDisplayName(FText::FromString(TEXT("Reflections Quality")));
+            reflectionsQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the reflections quality.")));
+            reflectionsQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            reflectionsQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            reflectionsQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            reflectionsQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            reflectionsQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            reflectionsQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetReflectionQuality));
+            reflectionsQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetReflectionQuality));
+            reflectionsQuality->setmbShouldApplySettingImmediately(true);
+
+            reflectionsQuality->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(reflectionsQuality);
+            
+            graphicsCategory->addChildListData(reflectionsQuality);
+        }
+
+        // post processing quality
+        {
+            auto postProcessQuality = NewObject<UMKUI_ListDataObjectStringInteger>();
+            postProcessQuality->setmDataId("postProcessQuality");
+            postProcessQuality->setmDataDisplayName(FText::FromString(TEXT("Pose Process Quality")));
+            postProcessQuality->setmDescriptionRichText(FText::FromString(TEXT("Controls the post process quality.")));
+            postProcessQuality->addIntegerOption(0, FText::FromString(TEXT("Low")));
+            postProcessQuality->addIntegerOption(1, FText::FromString(TEXT("Medium")));
+            postProcessQuality->addIntegerOption(2, FText::FromString(TEXT("High")));
+            postProcessQuality->addIntegerOption(3, FText::FromString(TEXT("Epic")));
+            postProcessQuality->addIntegerOption(4, FText::FromString(TEXT("Cinematic")));
+            postProcessQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetPostProcessingQuality));
+            postProcessQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetPostProcessingQuality));
+            postProcessQuality->setmbShouldApplySettingImmediately(true);
+
+            postProcessQuality->addDataDependency(overallQuality);
+            overallQuality->addDataDependency(postProcessQuality);
+            
+            graphicsCategory->addChildListData(postProcessQuality);
         }
     }
     
