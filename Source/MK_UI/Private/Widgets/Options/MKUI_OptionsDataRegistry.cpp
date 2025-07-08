@@ -11,6 +11,10 @@
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectScalar.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectStringResolution.h"
+#include "Internationalization/StringTableRegistry.h"
+
+#define GET_DESCRIPTION(key) \
+    LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)
 
 #define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName) \
     MakeShared<MKUI_FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UMKUI_GameUserSettings, accessorFuncName))
@@ -251,7 +255,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             windowMode = NewObject<UMKUI_ListDataObjectStringEnum>();
             windowMode->setmDataId("windowMode");
             windowMode->setmDataDisplayName(FText::FromString(TEXT("Fullscreen Mode")));
-            windowMode->setmDescriptionRichText(FText::FromString(TEXT("This is description for full screen option")));
+            windowMode->setmDescriptionRichText(GET_DESCRIPTION("WindowModeDescKey"));
             windowMode->addEnumOption(EWindowMode::Fullscreen, FText::FromString(TEXT("Fullscreen")));
             windowMode->addEnumOption(EWindowMode::Windowed, FText::FromString(TEXT("Windowed")));
             windowMode->addEnumOption(EWindowMode::WindowedFullscreen, FText::FromString(TEXT("Borderless Window")));
