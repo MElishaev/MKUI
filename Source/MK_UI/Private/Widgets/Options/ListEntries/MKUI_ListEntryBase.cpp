@@ -10,7 +10,7 @@
 
 void UMKUI_ListEntryBase::nativeOnListEntryWidgetHovered(bool bHovered)
 {
-    BP_onListEntryWidgetHovered(bHovered, IsListItemSelected());
+    BP_onListEntryWidgetHovered(bHovered, GetListItem() ? IsListItemSelected() : false);
 }
 
 void UMKUI_ListEntryBase::NativeOnListItemObjectSet(UObject* listItemObject)

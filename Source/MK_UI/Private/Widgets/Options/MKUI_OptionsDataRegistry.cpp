@@ -311,6 +311,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             gamma->setmDescriptionRichText(FText::FromString(TEXT("Controls the brightness of the game.")));
             gamma->setmDisplayValueRange(TRange<float>(0.f, 1.f));
             gamma->setmOutputValueRange(TRange<float>(1.7f, 2.7f)); // UE internal Gamma range
+            gamma->setmSliderStepSize(0.01f);
             gamma->setDefaultValueFromString(LexToString(2.2f));
             gamma->setmDisplayNumericType(ECommonNumericType::Percentage);
             gamma->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
@@ -347,6 +348,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             resolutionScale->setmDescriptionRichText(FText::FromString(TEXT("Controls quality of rendered objects in game.")));
             resolutionScale->setmDisplayValueRange(TRange<float>(0.f, 1.f));
             resolutionScale->setmOutputValueRange(TRange<float>(0.f, 1.f));
+            resolutionScale->setmSliderStepSize(0.01f);
             resolutionScale->setmDisplayNumericType(ECommonNumericType::Percentage);
             resolutionScale->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
             resolutionScale->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetResolutionScaleNormalized));
