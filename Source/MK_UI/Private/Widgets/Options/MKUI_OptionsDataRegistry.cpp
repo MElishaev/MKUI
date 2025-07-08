@@ -522,6 +522,57 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             graphicsCategory->addChildListData(postProcessQuality);
         }
     }
+
+    /****************************** advanced graphics category **********************************/
+    {
+        auto advancedGraphicsCollection = NewObject<UMKUI_ListDataObjectCollection>();
+        advancedGraphicsCollection->setmDataId(FName("advancedGraphicsCollection"));
+        advancedGraphicsCollection->setmDataDisplayName(FText::FromString(TEXT("Advanced Graphics")));
+        videoTabCollection->addChildListData(advancedGraphicsCollection);
+
+        // vertical sync
+        {
+            auto verticalSync = NewObject<UMKUI_ListDataObjectStringBool>();
+            verticalSync->setmDataId("verticalSync");
+            verticalSync->setmDataDisplayName(FText::FromString(TEXT("Vertical Sync")));
+            verticalSync->setmDescriptionRichText(FText::FromString(TEXT("Enable/disable vertical sync.")));
+            verticalSync->setFalseAsDefaultValue();
+            verticalSync->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(IsVSyncEnabled));
+            verticalSync->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetVSyncEnabled));
+            verticalSync->setmbShouldApplySettingImmediately(true);
+
+            FOptionsDataEditConditionDescriptor fullscreenCondition;
+            fullscreenCondition.setmEditConditionFunc([windowMode]() {
+                return windowMode->getCurrentValueAsEnum<EWindowMode::Type>() == EWindowMode::Fullscreen;
+            });
+            fullscreenCondition.setmDisabledForcedStringValue(TEXT("false"));
+            fullscreenCondition.setmDisabledRichStringReason(TEXT("\n<Disabled>This options is only modifyable in Fullscreen mode</>"));
+
+            verticalSync->addEditCondition(fullscreenCondition);
+            
+            advancedGraphicsCollection->addChildListData(verticalSync);
+        }
+
+        // frame rate limit
+        {
+            auto frameRateLimit = NewObject<UMKUI_ListDataObjectString>();
+            frameRateLimit->setmDataId("frameRateLimit");
+            frameRateLimit->setmDataDisplayName(FText::FromString(TEXT("Frame Rate Limit")));
+            frameRateLimit->setmDescriptionRichText(FText::FromString(TEXT("control the FPS")));
+            frameRateLimit->addOptionValue(LexToString(30.f), FText::FromString(TEXT("30")));
+            frameRateLimit->addOptionValue(LexToString(60.f), FText::FromString(TEXT("60")));
+            frameRateLimit->addOptionValue(LexToString(90.f), FText::FromString(TEXT("90")));
+            frameRateLimit->addOptionValue(LexToString(120.f), FText::FromString(TEXT("120")));
+            frameRateLimit->addOptionValue(LexToString(0.f), FText::FromString(TEXT("Uncapped")));
+            frameRateLimit->setDefaultValueFromString(LexToString(0.f));
+            frameRateLimit->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetFrameRateLimit));
+            frameRateLimit->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetFrameRateLimit));
+            frameRateLimit->setmbShouldApplySettingImmediately(true);
+
+            advancedGraphicsCollection->addChildListData(frameRateLimit);
+        }
+    }
+
     
     mRegisteredTabCollections.Add(videoTabCollection);
 }
