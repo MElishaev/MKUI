@@ -6,6 +6,7 @@
 #include "CommonButtonBase.h"
 #include "MKUI_CommonButtonBase.generated.h"
 
+class UCommonLazyImage;
 class UCommonTextBlock;
 
 /**
@@ -20,6 +21,9 @@ public:
     UFUNCTION(BlueprintCallable)
     void setButtonText(const FText& text);
 
+    UFUNCTION(BlueprintCallable)
+    void setButtonImg(const FSlateBrush& img);
+    
     UFUNCTION(BlueprintCallable)
     FText getButtonText() const;
     
@@ -37,7 +41,9 @@ private:
     // widget Hierarchy graph
     UPROPERTY(meta=(BindWidgetOptional))
     UCommonTextBlock* mCommonButtonText;
-    
+
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"))
+    UCommonLazyImage* mButtonImg;
     /**** Bound widgets ****/
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI", meta=(AllowPrivateAccess))

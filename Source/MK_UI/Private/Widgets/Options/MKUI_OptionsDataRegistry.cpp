@@ -3,6 +3,7 @@
 
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
+#include "CommonInputTypeEnum.h"
 #include "MKUI_FunctionLibrary.h"
 #include "MKUI_GameplayTags.h"
 #include "Settings/MKUI_GameUserSettings.h"
@@ -12,6 +13,9 @@
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectStringResolution.h"
 #include "Internationalization/StringTableRegistry.h"
+#include "EnhancedInputSubsystems.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
 
 #define GET_DESCRIPTION(key) \
     LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)
@@ -24,7 +28,7 @@ void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
     initGameplayCollectionTab();
     initAudioCollectionTab();
     initVideoCollectionTab();
-    initControlCollectionTab();
+    initControlCollectionTab(owningLocalPlayer);
 }
 
 TArray<UMKUI_ListDataObjectBase*> UMKUI_OptionsDataRegistry::getListSourceItemsBySelectedTabId(const FName tabId) const
@@ -44,7 +48,7 @@ TArray<UMKUI_ListDataObjectBase*> UMKUI_OptionsDataRegistry::getListSourceItemsB
             }
         }
     }
-    
+
     return allChildListItemsRecursive;
 }
 
@@ -71,15 +75,16 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
     const auto gameplayTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     gameplayTabCollection->setmDataId(FName("gameplayTabCollection"));
     gameplayTabCollection->setmDataDisplayName(FText::FromString(TEXT("Gameplay")));
-    
+
     // TODO: best case will be to read and populate this data from some file that can be changed without recompiling the project
-    
+
     // in this section allocate all the different settings for this tab
     {
         const auto gameDifficulty = NewObject<UMKUI_ListDataObjectString>();
         gameDifficulty->setmDataId("gameDifficulty");
         gameDifficulty->setmDataDisplayName(FText::FromString(TEXT("Difficulty")));
-        gameDifficulty->setmDescriptionRichText(FText::FromString(TEXT("This lets you control how challenging you want your experience to be")));
+        gameDifficulty->setmDescriptionRichText(
+            FText::FromString(TEXT("This lets you control how challenging you want your experience to be")));
         gameDifficulty->addOptionValue(TEXT("Easy"), FText::FromString("Easy"));
         gameDifficulty->addOptionValue(TEXT("Normal"), FText::FromString("Normal"));
         gameDifficulty->addOptionValue(TEXT("Hard"), FText::FromString("Hard"));
@@ -100,7 +105,7 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
         testItem->setmSoftDescriptionImage(UMKUI_FunctionLibrary::getOptionsSoftImageByTag(MKUI_GameplayTags::MKUI_image_testImage));
         gameplayTabCollection->addChildListData(testItem);
     }
-    
+
     mRegisteredTabCollections.Add(gameplayTabCollection);
 }
 
@@ -136,7 +141,7 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
 
             // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
             overallVolume->setmbShouldApplySettingImmediately(false);
-            
+
             volumeCategoryCollection->addChildListData(overallVolume);
         }
 
@@ -158,7 +163,7 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
 
             // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
             musicVolume->setmbShouldApplySettingImmediately(false);
-            
+
             volumeCategoryCollection->addChildListData(musicVolume);
         }
 
@@ -180,7 +185,7 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
 
             // this setting has slider so the apply settings will be triggered "manually" on mouse capture end on the slider
             sfxVolume->setmbShouldApplySettingImmediately(false);
-            
+
             volumeCategoryCollection->addChildListData(sfxVolume);
         }
     }
@@ -223,7 +228,7 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
             soundCategory->addChildListData(useHDRAudio);
         }
     }
-    
+
     mRegisteredTabCollections.Add(audioTabCollection);
 }
 
@@ -234,7 +239,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
     videoTabCollection->setmDataDisplayName(FText::FromString(TEXT("Video")));
 
     UMKUI_ListDataObjectStringEnum* windowMode = nullptr; // in this scope because we need to use it for edit condition of screen resolution
-    
+
     /****************************** display category **********************************/
     {
         auto displayCategory = NewObject<UMKUI_ListDataObjectCollection>();
@@ -249,7 +254,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             return !(GIsEditor || GIsPlayInEditorWorld); // returns true only if packaged build  
         });
         packagedOnlyBuildCondition.setmDisabledRichStringReason(TEXT("<Disabled>This condition is modifyable only in packaged builds</>"));
-        
+
         // window mode
         {
             windowMode = NewObject<UMKUI_ListDataObjectStringEnum>();
@@ -286,7 +291,8 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
                 // screen resolution is editable if not set to borderless window
                 return (windowMode->getCurrentValueAsEnum<EWindowMode::Type>() != EWindowMode::WindowedFullscreen);
             });
-            windowModeCondition.setmDisabledRichStringReason(TEXT("\n<Disabled>Screen resolution isn't modifyable when set to borderless window</>"));
+            windowModeCondition.setmDisabledRichStringReason(
+                TEXT("\n<Disabled>Screen resolution isn't modifyable when set to borderless window</>"));
             windowModeCondition.setmDisabledForcedStringValue(screenResolution->getmMaxResolutionSupported());
             screenResolution->addEditCondition(windowModeCondition);
 
@@ -317,7 +323,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             gamma->setmNumberFormattingOptions(UMKUI_ListDataObjectScalar::noDecimal());
             gamma->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(getGamma));
             gamma->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(setGamma));
-            
+
             graphicsCategory->addChildListData(gamma);
         }
 
@@ -336,7 +342,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             overallQuality->setmDataDynamicGetter(MAKE_OPTIONS_DATA_ACCESSORS(GetOverallScalabilityLevel));
             overallQuality->setmDataDynamicSetter(MAKE_OPTIONS_DATA_ACCESSORS(SetOverallScalabilityLevel));
             overallQuality->setmbShouldApplySettingImmediately(true);
-            
+
             graphicsCategory->addChildListData(overallQuality);
         }
 
@@ -356,7 +362,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             resolutionScale->setmbShouldApplySettingImmediately(false);
 
             resolutionScale->addDataDependency(overallQuality);
-            
+
             graphicsCategory->addChildListData(resolutionScale);
         }
 
@@ -377,7 +383,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             globalIllumination->addDataDependency(overallQuality);
             overallQuality->addDataDependency(globalIllumination);
-            
+
             graphicsCategory->addChildListData(globalIllumination);
         }
 
@@ -398,10 +404,10 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             shadowQuality->addDataDependency(overallQuality);
             overallQuality->addDataDependency(shadowQuality);
-            
+
             graphicsCategory->addChildListData(shadowQuality);
         }
-        
+
         // anti aliasing
         {
             auto antiAliasing = NewObject<UMKUI_ListDataObjectStringInteger>();
@@ -419,7 +425,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             antiAliasing->addDataDependency(overallQuality);
             overallQuality->addDataDependency(antiAliasing);
-            
+
             graphicsCategory->addChildListData(antiAliasing);
         }
 
@@ -440,7 +446,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             viewDistance->addDataDependency(overallQuality);
             overallQuality->addDataDependency(viewDistance);
-            
+
             graphicsCategory->addChildListData(viewDistance);
         }
 
@@ -461,7 +467,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             textureQuality->addDataDependency(overallQuality);
             overallQuality->addDataDependency(textureQuality);
-            
+
             graphicsCategory->addChildListData(textureQuality);
         }
 
@@ -482,7 +488,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             vfxQuality->addDataDependency(overallQuality);
             overallQuality->addDataDependency(vfxQuality);
-            
+
             graphicsCategory->addChildListData(vfxQuality);
         }
 
@@ -503,7 +509,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             reflectionsQuality->addDataDependency(overallQuality);
             overallQuality->addDataDependency(reflectionsQuality);
-            
+
             graphicsCategory->addChildListData(reflectionsQuality);
         }
 
@@ -524,7 +530,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
 
             postProcessQuality->addDataDependency(overallQuality);
             overallQuality->addDataDependency(postProcessQuality);
-            
+
             graphicsCategory->addChildListData(postProcessQuality);
         }
     }
@@ -555,7 +561,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             fullscreenCondition.setmDisabledRichStringReason(TEXT("\n<Disabled>This options is only modifyable in Fullscreen mode</>"));
 
             verticalSync->addEditCondition(fullscreenCondition);
-            
+
             advancedGraphicsCollection->addChildListData(verticalSync);
         }
 
@@ -579,14 +585,67 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
         }
     }
 
-    
+
     mRegisteredTabCollections.Add(videoTabCollection);
 }
 
-void UMKUI_OptionsDataRegistry::initControlCollectionTab()
+void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLocalPlayer)
 {
     const auto controlsTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     controlsTabCollection->setmDataId(FName("controlsTabCollection"));
     controlsTabCollection->setmDataDisplayName(FText::FromString(TEXT("Controls")));
+
+    auto eiSubsystem = owningLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+    check(eiSubsystem);
+    auto eiUserSettings = eiSubsystem->GetUserSettings();
+    check(eiUserSettings);
+
+    // mouse and keyboard
+    {
+        const auto keyboardMouseCollection = NewObject<UMKUI_ListDataObjectCollection>();
+        keyboardMouseCollection->setmDataId(FName("keyboardMouseCollection"));
+        keyboardMouseCollection->setmDataDisplayName(FText::FromString(TEXT("Mouse & Keyboard")));
+
+        controlsTabCollection->addChildListData(keyboardMouseCollection);
+
+        // keyboard and mouse inputs
+        {
+            FPlayerMappableKeyQueryOptions keyboardMouseFilter;
+            keyboardMouseFilter.KeyToMatch = EKeys::S; // set here any keyboard key
+            // true here means that filter passes only for keys that return true for what the above key returns
+            // true to on the following queries:  IsGamepadKey, IsTouch, and IsGesture - which actually came to pass only keyboard&mouse keys
+            keyboardMouseFilter.bMatchBasicKeyTypes = true;
+
+            for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
+                // we don't care about the key of the pair because we have only one profile
+                auto mappableKeyProfile = profilePair.Value;
+                check(mappableKeyProfile);
+
+                // for each profile, get all the mappings, and for each mapping run over all mapped keys
+                for (const auto& mappingRowPair : mappableKeyProfile->GetPlayerMappingRows()) {
+                    for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
+                        // each IA can have few mapped keys (like gamepad and keyboard)
+                        if (mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, keyboardMouseFilter)) {
+                            auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
+                            keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
+                            keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
+                            keyRemapDataObj->initKeyRemapData(eiUserSettings,
+                                                              mappableKeyProfile,
+                                                              ECommonInputType::MouseAndKeyboard,
+                                                              playerKeyMapping);
+                            controlsTabCollection->addChildListData(keyRemapDataObj);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     mRegisteredTabCollections.Add(controlsTabCollection);
+}
+
+bool UMKUI_OptionsDataRegistry::isKeyAlreadyMapped() const
+{
+    // todo - implement
+    return false;
 }

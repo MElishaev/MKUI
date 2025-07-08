@@ -2,6 +2,8 @@
 
 
 #include "Widgets/Components/MKUI_CommonButtonBase.h"
+
+#include "CommonLazyImage.h"
 #include "CommonTextBlock.h"
 #include "Subsystems/MKUI_Subsystem.h"
 
@@ -9,6 +11,13 @@ void UMKUI_CommonButtonBase::setButtonText(const FText& text)
 {
     if (mCommonButtonText && !text.IsEmpty()) {
         mCommonButtonText->SetText(mbUseUpperCaseForButtonText ? text.ToUpper() : text);
+    }
+}
+
+void UMKUI_CommonButtonBase::setButtonImg(const FSlateBrush& img)
+{
+    if (mButtonImg) {
+        mButtonImg->SetBrush(img);
     }
 }
 
