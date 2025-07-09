@@ -12,7 +12,7 @@ void UMKUI_ListEntryScalar::NativeOnInitialized()
 
     mSettingSlider->OnValueChanged.AddUniqueDynamic(this, &ThisClass::handleSliderValueChanged);
     mSettingSlider->OnMouseCaptureBegin.AddUniqueDynamic(this, &ThisClass::handleSliderMouseCaptureBegin);
-    mSettingSlider->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::handleSliderMouseCaptureEnd); // todo this should trigger writing to file i think
+    mSettingSlider->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::handleSliderMouseCaptureEnd);
 }
 
 void UMKUI_ListEntryScalar::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject)

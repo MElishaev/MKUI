@@ -26,7 +26,11 @@ public:
                           ECommonInputType inputKeyType,
                           const FPlayerKeyMapping& keyMapping);
 
+    FSlateBrush getIconFromCurrentKey() const;
+    
 private:
+    FPlayerKeyMapping* getOwningKeyMapping() const;
+    
     UPROPERTY(Transient)
     UEnhancedInputUserSettings* mCachedUserSettings;
 

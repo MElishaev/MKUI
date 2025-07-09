@@ -11,6 +11,13 @@
 void UMKUI_ListEntryBase::nativeOnListEntryWidgetHovered(bool bHovered)
 {
     BP_onListEntryWidgetHovered(bHovered, GetListItem() ? IsListItemSelected() : false);
+
+    if (bHovered) {
+        BP_toggleEntryHighlightState(true);
+    }
+    else {
+        BP_toggleEntryHighlightState(GetListItem() && IsListItemSelected());
+    }
 }
 
 void UMKUI_ListEntryBase::NativeOnListItemObjectSet(UObject* listItemObject)
@@ -40,6 +47,12 @@ FReply UMKUI_ListEntryBase::NativeOnFocusReceived(const FGeometry& InGeometry, c
         }
     }
     return Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
+}
+
+void UMKUI_ListEntryBase::NativeOnItemSelectionChanged(bool bIsSelected)
+{
+    IUserObjectListEntry::NativeOnItemSelectionChanged(bIsSelected);
+    BP_toggleEntryHighlightState(bIsSelected);
 }
 
 void UMKUI_ListEntryBase::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject)

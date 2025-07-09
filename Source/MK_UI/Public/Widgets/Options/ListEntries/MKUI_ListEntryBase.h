@@ -31,7 +31,14 @@ protected:
      * Child should return the exact widget that it wants the gamepad to control and interact with
      */
     UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Get Widget to Focus For Gamepad"))
-    UWidget* BP_getWidgetToFocusForGamepad() const; 
+    UWidget* BP_getWidgetToFocusForGamepad() const;
+
+    /**
+     * This method toggles the highlight state of the entry in case of hover or selection
+     * @param bShouldHighlight true if should highlight the entry
+     */
+    UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="On Toggle Highlight State"))
+    void BP_toggleEntryHighlightState(bool bShouldHighlight) const;
     
     /**
      * Here we use this method to fix the focus target when using gamepad. This will fix the issues
@@ -40,6 +47,8 @@ protected:
      */
     virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 
+    virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
+    
     // Child class should override this method to implement initialization. Super call is expected.
     // This is called when the data object that will be represented by this entry widget was set.
     virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject);
