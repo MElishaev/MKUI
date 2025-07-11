@@ -8,6 +8,7 @@
 #include "Subsystems/MKUI_Subsystem.h"
 #include "Widgets/Components/MKUI_CommonButtonBase.h"
 #include "Widgets/Options/MKUI_W_KeyRemapScreen.h"
+#include "Widgets/Options/MKUI_W_OptionsScreen.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
 
 void UMKUI_ListEntryKeyRemap::onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject)
@@ -31,11 +32,13 @@ void UMKUI_ListEntryKeyRemap::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     mRemapKey->OnClicked().AddUObject(this, &ThisClass::handleKeyRemapButtonClicked);
-    mResetKeyMapping->OnClicked().AddUObject(this, &UMKUI_ListEntryKeyRemap::handleKeyRemapButtonClicked);
+    mResetKeyMapping->OnClicked().AddUObject(this, &UMKUI_ListEntryKeyRemap::handleResetKeyBindingButtonClicked);
 }
 
 void UMKUI_ListEntryKeyRemap::handleKeyRemapButtonClicked()
 {
+    selectThisEntryWidget();
+
     UMKUI_Subsystem::getInstance(this)->pushSoftWidgetToStackAsync(
         MKUI_GameplayTags::MKUI_widgetStack_modal,
         UMKUI_FunctionLibrary::getSoftWidgetClassByTag(MKUI_GameplayTags::MKUI_widget_keyRemapScreen),
@@ -55,14 +58,45 @@ void UMKUI_ListEntryKeyRemap::handleKeyRemapButtonClicked()
 
 void UMKUI_ListEntryKeyRemap::handleResetKeyBindingButtonClicked()
 {
+    selectThisEntryWidget();
+
+    if (!mCachedOwningKeyRemapDataObject) {
+        return;
+    }
+
+    // if current key is already the default key, display OK screen that says this is already the default
+    if (!mCachedOwningKeyRemapDataObject->canResetBackToDefaultValue()) {
+        UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+            EConfirmScreenType::Ok,
+            FText::FromString(TEXT("Reset key mapping")),
+            FText::FromString(TEXT("This key binding is already set to default")),
+            [](EConfirmScreenButtonType clickedButton) {
+            }
+            );
+        return;
+    }
+
+    // else reset the binding back to default
+    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+        EConfirmScreenType::YesNo,
+        FText::FromString(TEXT("Reset key mapping")),
+        FText::FromString(
+            TEXT("Are you sure you want to reset key binding for ") + mCachedOwningKeyRemapDataObject->getmDataDisplayName().ToString() +
+            TEXT("?")),
+        [this](EConfirmScreenButtonType clickedButton) {
+            if (clickedButton == EConfirmScreenButtonType::Confirmed) {
+                mCachedOwningKeyRemapDataObject->tryResetBackToDefaultValue();
+            }
+        }
+        );
 }
 
 void UMKUI_ListEntryKeyRemap::handleKeyToRemapPressed(const FKey& pressedKey)
 {
     if (mCachedOwningKeyRemapDataObject) {
-        mCachedOwningKeyRemapDataObject->bindNewInputKey(pressedKey);
-    }
-}
+                        mCachedOwningKeyRemapDataObject->bindNewInputKey(pressedKey);
+                    }
+                }
 
 void UMKUI_ListEntryKeyRemap::handleKeyRemapCanceled(const FString& cancelReason)
 {
@@ -71,5 +105,5 @@ void UMKUI_ListEntryKeyRemap::handleKeyRemapCanceled(const FString& cancelReason
         FText::FromString(TEXT("Key Remap")),
         FText::FromString(cancelReason),
         [](EConfirmScreenButtonType clickedButton) {}
-    );
+        );
 }

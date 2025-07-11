@@ -27,14 +27,19 @@ public:
                           const FPlayerKeyMapping& keyMapping);
 
     void bindNewInputKey(const FKey& newKey);
-    
+
     FSlateBrush getIconFromCurrentKey() const;
 
     FORCEINLINE ECommonInputType getDesiredInputType() const { return mCachedDesiredInputKeyType; }
+
+    virtual bool hasDefaultValue() const override;
+    virtual bool canResetBackToDefaultValue() const override;
+    virtual bool tryResetBackToDefaultValue() override;
     
+    FORCEINLINE ECommonInputType getDesiredInputType() const { return mCachedDesiredInputKeyType; }
 private:
     FPlayerKeyMapping* getOwningKeyMapping() const;
-    
+
     UPROPERTY(Transient)
     UEnhancedInputUserSettings* mCachedUserSettings;
 

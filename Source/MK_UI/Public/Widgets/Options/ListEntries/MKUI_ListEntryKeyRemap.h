@@ -22,6 +22,8 @@ protected:
     virtual void handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
 
     virtual void NativeOnInitialized() override;
+
+    
 private:
     void handleKeyRemapButtonClicked();
     void handleResetKeyBindingButtonClicked();

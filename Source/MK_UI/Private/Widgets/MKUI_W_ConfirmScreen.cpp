@@ -82,27 +82,8 @@ void UMKUI_W_ConfirmScreen::initConfirmScreen(UConfirmScreenInfoObject* infoObje
 
     // allocates the buttons for this confirm screen
     for (const auto& availableButtonInfo : infoObject->mAvailableButtons) {
-
-        /* get the info about the click/back actions of common UI input we configured in the project setting */
-        UInputAction* inputAction = nullptr;
-        switch (availableButtonInfo.mConfirmScreenButtonType) {
-            case EConfirmScreenButtonType::Confirmed:
-                // commented this out because if the button type is "confirm" (say "Enter"), but the widget focuses on the "cancel" button
-                // we dont want the action of pressing the "confirm" button to exit the game if we are
-                // in confirmation screen to exit the game, the "no" is highlighted and we pressed enter..
-                // inputAction = ICommonInputModule::GetSettings().GetEnhancedInputClickAction();
-                break;
-            case EConfirmScreenButtonType::Canceled:
-            case EConfirmScreenButtonType::Closed:
-                inputAction = ICommonInputModule::GetSettings().GetEnhancedInputBackAction();
-                break;
-            case EConfirmScreenButtonType::Unknown:
-                break;
-        }
-
         auto addedButton = mButtons->CreateEntry<UMKUI_CommonButtonBase>(); // creates entry into the dynamic box and returns a ptr to it
         addedButton->setButtonText(availableButtonInfo.mButtonText);
-        addedButton->SetTriggeringEnhancedInputAction(inputAction); // set button action based on the passed type
         
         // bind a function to the on clicked of the newly created button - the function is passed by the caller for
         // the creation of this confirm screen, hence the caller will handle the result of the interaction with this
