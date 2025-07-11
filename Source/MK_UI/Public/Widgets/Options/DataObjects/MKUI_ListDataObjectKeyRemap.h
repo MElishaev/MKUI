@@ -26,7 +26,11 @@ public:
                           ECommonInputType inputKeyType,
                           const FPlayerKeyMapping& keyMapping);
 
+    void bindNewInputKey(const FKey& newKey);
+    
     FSlateBrush getIconFromCurrentKey() const;
+
+    FORCEINLINE ECommonInputType getDesiredInputType() const { return mCachedDesiredInputKeyType; }
     
 private:
     FPlayerKeyMapping* getOwningKeyMapping() const;

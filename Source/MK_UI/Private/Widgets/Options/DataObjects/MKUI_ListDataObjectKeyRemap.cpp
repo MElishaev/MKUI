@@ -20,6 +20,22 @@ void UMKUI_ListDataObjectKeyRemap::initKeyRemapData(UEnhancedInputUserSettings* 
     mCachedDesiredInputKeyType = inputKeyType;
 }
 
+void UMKUI_ListDataObjectKeyRemap::bindNewInputKey(const FKey& newKey)
+{
+    check(mCachedUserSettings);
+
+    FMapPlayerKeyArgs keyArgs;
+    keyArgs.MappingName = mCachedMappingName;
+    keyArgs.Slot = mCachedMappableKeySlot;
+    keyArgs.NewKey = newKey;
+    FGameplayTagContainer container;
+    
+    mCachedUserSettings->MapPlayerKey(keyArgs, container);
+    mCachedUserSettings->SaveSettings();
+
+    notifyDataModified(this);
+}
+
 FSlateBrush UMKUI_ListDataObjectKeyRemap::getIconFromCurrentKey() const
 {
     FSlateBrush foundBrush;

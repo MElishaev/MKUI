@@ -20,8 +20,15 @@ protected:
     virtual void onOwningListDataObjectSet(UMKUI_ListDataObjectBase* listDataObject) override;
 
     virtual void handleOwningListDataObjectModified(UMKUI_ListDataObjectBase* listDataObject, EOptionsListDataModifiedReason reason) override;
-    
+
+    virtual void NativeOnInitialized() override;
 private:
+    void handleKeyRemapButtonClicked();
+    void handleResetKeyBindingButtonClicked();
+
+    void handleKeyToRemapPressed(const FKey& pressedKey);
+    void handleKeyRemapCanceled(const FString& cancelReason);
+    
     /******** bound widgets **********/
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
     UMKUI_CommonButtonBase* mRemapKey;
