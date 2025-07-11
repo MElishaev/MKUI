@@ -30,6 +30,11 @@ private:
 
     void handleKeyToRemapPressed(const FKey& pressedKey);
     void handleKeyRemapCanceled(const FString& cancelReason);
+
+    // returns key remap data object that represents the input key, if not found returns nullptr
+    UMKUI_ListDataObjectKeyRemap* findDataObjectKeyRemapByKey(const FKey& key) const;
+
+    void showBindConfirmationScreen(const FKey& keyToBind);
     
     /******** bound widgets **********/
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))

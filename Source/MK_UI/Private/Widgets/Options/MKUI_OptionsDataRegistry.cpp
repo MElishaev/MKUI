@@ -643,9 +643,3 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
 
     mRegisteredTabCollections.Add(controlsTabCollection);
 }
-
-bool UMKUI_OptionsDataRegistry::isKeyAlreadyMapped() const
-{
-    // todo - implement
-    return false;
-}

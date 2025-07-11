@@ -20,20 +20,20 @@ void UMKUI_ListDataObjectKeyRemap::initKeyRemapData(UEnhancedInputUserSettings* 
     mCachedDesiredInputKeyType = inputKeyType;
 }
 
-void UMKUI_ListDataObjectKeyRemap::bindNewInputKey(const FKey& newKey)
+bool UMKUI_ListDataObjectKeyRemap::tryBindNewInputKey(const FKey& newKey)
 {
     check(mCachedUserSettings);
 
-    FMapPlayerKeyArgs keyArgs;
-    keyArgs.MappingName = mCachedMappingName;
-    keyArgs.Slot = mCachedMappableKeySlot;
-    keyArgs.NewKey = newKey;
-    FGameplayTagContainer container;
+    if (!isKeyAlreadyBound(newKey)) {
+        bindNewInputKey(newKey);
+        return true;
+    }
+    return false;
+}
 
-    mCachedUserSettings->MapPlayerKey(keyArgs, container);
-    mCachedUserSettings->SaveSettings();
-
-    notifyDataModified(this);
+void UMKUI_ListDataObjectKeyRemap::unbindInputKey()
+{
+    bindNewInputKey(FKey(NAME_None));
 }
 
 FSlateBrush UMKUI_ListDataObjectKeyRemap::getIconFromCurrentKey() const
@@ -50,6 +50,20 @@ FSlateBrush UMKUI_ListDataObjectKeyRemap::getIconFromCurrentKey() const
     }
 
     return foundBrush;
+}
+
+void UMKUI_ListDataObjectKeyRemap::bindNewInputKey(const FKey& newKey)
+{
+    FMapPlayerKeyArgs keyArgs;
+    keyArgs.MappingName = mCachedMappingName;
+    keyArgs.Slot = mCachedMappableKeySlot;
+    keyArgs.NewKey = newKey;
+    FGameplayTagContainer container;
+
+    mCachedUserSettings->MapPlayerKey(keyArgs, container);
+    mCachedUserSettings->SaveSettings();
+
+    notifyDataModified(this);
 }
 
 FPlayerKeyMapping* UMKUI_ListDataObjectKeyRemap::getOwningKeyMapping() const
@@ -75,7 +89,6 @@ bool UMKUI_ListDataObjectKeyRemap::canResetBackToDefaultValue() const
 
 bool UMKUI_ListDataObjectKeyRemap::tryResetBackToDefaultValue()
 {
-    // todo - what happens if the key to reset to is already bound?
     if (canResetBackToDefaultValue()) {
         check(mCachedUserSettings);
         getOwningKeyMapping()->ResetToDefault();
@@ -86,7 +99,7 @@ bool UMKUI_ListDataObjectKeyRemap::tryResetBackToDefaultValue()
     return false;
 }
 
-TTuple<bool, FText> UMKUI_ListDataObjectKeyRemap::isKeyAlreadyBound(const FKey& keyToCheck) const
+bool UMKUI_ListDataObjectKeyRemap::isKeyAlreadyBound(const FKey& keyToCheck) const
 {
     check(mCachedMappableKeyProfile);
 
@@ -94,14 +107,14 @@ TTuple<bool, FText> UMKUI_ListDataObjectKeyRemap::isKeyAlreadyBound(const FKey& 
     for (const auto& mappingRowPair : mCachedMappableKeyProfile->GetPlayerMappingRows()) {
         for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
             if ((playerKeyMapping.GetMappingName() != mCachedMappingName) && (playerKeyMapping.GetCurrentKey() == keyToCheck)) {
-                MKUI_Debug::print(FString::Printf(TEXT("%s is already rebount to %s"),
+                MKUI_Debug::print(FString::Printf(TEXT("%s is already bound to %s"),
                                                   *(keyToCheck.GetDisplayName().ToString()),
                                                   *(playerKeyMapping.GetDisplayName().ToString())));
-                return {true, playerKeyMapping.GetDisplayName()};
+                return true;
             }
         }
     }
 
     MKUI_Debug::print(FString::Printf(TEXT("%s is free for binding"), *(keyToCheck.GetDisplayName().ToString())));
-    return {false, FText()};
+    return false;
 }

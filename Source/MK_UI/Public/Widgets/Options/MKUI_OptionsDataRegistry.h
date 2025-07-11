@@ -31,9 +31,6 @@ private:
     void initAudioCollectionTab();
     void initVideoCollectionTab();
     void initControlCollectionTab(ULocalPlayer* owningLocalPlayer);
-
-    // checks if a key is already mapped
-    bool isKeyAlreadyMapped() const;
     
     UPROPERTY(Transient)
     TArray<UMKUI_ListDataObjectCollection*> mRegisteredTabCollections; // todo: why not map?
