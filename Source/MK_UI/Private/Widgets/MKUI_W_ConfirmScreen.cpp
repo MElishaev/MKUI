@@ -93,10 +93,15 @@ void UMKUI_W_ConfirmScreen::initConfirmScreen(UConfirmScreenInfoObject* infoObje
             DeactivateWidget(); // after called the clicked callback this confirm screen can be closed
         });
     }
+}
 
+UWidget* UMKUI_W_ConfirmScreen::NativeGetDesiredFocusTarget() const
+{
     if (mButtons->GetNumEntries() != 0) {
         // hopefully set focus on the "no/cancel" button preventing a mistaken double keyboard click or something
         // (also, this will focus the navigation on the new confirm screen for gamepad users)
         mButtons->GetAllEntries().Last()->SetFocus();
     }
+
+    return Super::NativeGetDesiredFocusTarget();
 }

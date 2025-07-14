@@ -3,8 +3,11 @@
 
 #include "Widgets/Options/MKUI_W_KeyRemapScreen.h"
 
+#include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
 #include "CommonRichTextBlock.h"
+#include "ICommonInputModule.h"
+#include "CommonUITypes.h"
 #include "Framework/Application/IInputProcessor.h"
 
 /**
@@ -15,8 +18,9 @@
 class FKeyRemapScreenInputPreprocessor : public IInputProcessor
 {
 public:
-    FKeyRemapScreenInputPreprocessor(ECommonInputType inputTypeToListenTo) :
-        mCachedInputTypeToListenTo(inputTypeToListenTo)
+    FKeyRemapScreenInputPreprocessor(ECommonInputType inputTypeToListenTo, ULocalPlayer* owningLocalPlayer) :
+        mCachedInputTypeToListenTo(inputTypeToListenTo),
+        mCachedWeakOwningLocalPlayer(owningLocalPlayer)
     {
     }
 
@@ -73,6 +77,7 @@ protected:
 
 private:
     ECommonInputType mCachedInputTypeToListenTo;
+    TWeakObjectPtr<ULocalPlayer> mCachedWeakOwningLocalPlayer;
 };
 
 
@@ -85,7 +90,7 @@ void UMKUI_W_KeyRemapScreen::NativeOnActivated()
 {
     Super::NativeOnActivated();
 
-    mCachedInputPreprocessor = MakeShared<FKeyRemapScreenInputPreprocessor>(mCachedDesiredInputType);
+    mCachedInputPreprocessor = MakeShared<FKeyRemapScreenInputPreprocessor>(mCachedDesiredInputType, GetOwningLocalPlayer());
     mCachedInputPreprocessor->mOnInputPreprocessorKeyPressed.BindUObject(this, &ThisClass::handleValidKeyPressed);
     mCachedInputPreprocessor->mOnInputPreprocessorKeySelectCanceled.BindUObject(this, &ThisClass::handleKeySelectionCanceled);
 

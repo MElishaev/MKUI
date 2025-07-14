@@ -600,7 +600,7 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
     auto eiUserSettings = eiSubsystem->GetUserSettings();
     check(eiUserSettings);
 
-    // mouse and keyboard
+    // mouse and keyboard collection
     {
         const auto keyboardMouseCollection = NewObject<UMKUI_ListDataObjectCollection>();
         keyboardMouseCollection->setmDataId(FName("keyboardMouseCollection"));
@@ -616,6 +616,10 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
             // true to on the following queries:  IsGamepadKey, IsTouch, and IsGesture - which actually came to pass only keyboard&mouse keys
             keyboardMouseFilter.bMatchBasicKeyTypes = true;
 
+            ensureMsgf(ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 6, 
+                TEXT("%s: Starting with 5.6 use EIUserSettings->GetAllAvailableKeyProfiles()! Else just fails with no mappings returned..."),
+                *FString::Printf(TEXT(__FUNCTION__)));
+            
             for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
                 // we don't care about the key of the pair because we have only one profile
                 auto mappableKeyProfile = profilePair.Value;
@@ -633,7 +637,46 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
                                                               mappableKeyProfile,
                                                               ECommonInputType::MouseAndKeyboard,
                                                               playerKeyMapping);
-                            controlsTabCollection->addChildListData(keyRemapDataObj);
+                            keyboardMouseCollection->addChildListData(keyRemapDataObj);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // gamepad collection - comment out if not needed or todo - implement a way so that can be toggled on or off through BP
+    {
+        const auto gamepadCollection = NewObject<UMKUI_ListDataObjectCollection>();
+        gamepadCollection->setmDataId(FName("gamepadCollection"));
+        gamepadCollection->setmDataDisplayName(FText::FromString(TEXT("Gamepad")));
+
+        controlsTabCollection->addChildListData(gamepadCollection);
+
+        // gamepad inputs
+        {
+            FPlayerMappableKeyQueryOptions gamepadFilter;
+            gamepadFilter.KeyToMatch = EKeys::Gamepad_RightShoulder;
+            gamepadFilter.bMatchBasicKeyTypes = true;
+
+            for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
+                // we don't care about the key of the pair because we have only one profile
+                auto mappableKeyProfile = profilePair.Value;
+                check(mappableKeyProfile);
+
+                // for each profile, get all the mappings, and for each mapping run over all mapped keys
+                for (const auto& mappingRowPair : mappableKeyProfile->GetPlayerMappingRows()) {
+                    for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
+                        // each IA can have few mapped keys (like gamepad and keyboard)
+                        if (mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, gamepadFilter)) {
+                            auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
+                            keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
+                            keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
+                            keyRemapDataObj->initKeyRemapData(eiUserSettings,
+                                                              mappableKeyProfile,
+                                                              ECommonInputType::Gamepad,
+                                                              playerKeyMapping);
+                            gamepadCollection->addChildListData(keyRemapDataObj);
                         }
                     }
                 }

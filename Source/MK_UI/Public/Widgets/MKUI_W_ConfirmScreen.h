@@ -53,6 +53,9 @@ class MK_UI_API UMKUI_W_ConfirmScreen : public UMKUI_W_ActivatableBase
 public:
     // gets called when this widget is constructed and before it is pushed to the stack
     void initConfirmScreen(UConfirmScreenInfoObject* infoObject, TFunction<void(EConfirmScreenButtonType)> clickedButtonCallback);
+
+protected:
+    virtual UWidget* NativeGetDesiredFocusTarget() const override;
     
 private:
     UPROPERTY(meta=(BindWidget))

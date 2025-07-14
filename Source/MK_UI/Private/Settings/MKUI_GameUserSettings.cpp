@@ -40,7 +40,10 @@ void UMKUI_GameUserSettings::setSFXVolume(float vol)
 void UMKUI_GameUserSettings::setAllowBackgroundAudio(bool bIsAllowed)
 {
     mbAllowBackgroundAudio = bIsAllowed;
-    // todo: the actual logic to control the volume in game goes here
+
+    const float backgroundVolume = mbAllowBackgroundAudio ? 1.f : 0.f;
+
+    FApp::SetUnfocusedVolumeMultiplier(backgroundVolume);
 }
 
 void UMKUI_GameUserSettings::setUseHDRAudioMode(bool bIsAllowed)
