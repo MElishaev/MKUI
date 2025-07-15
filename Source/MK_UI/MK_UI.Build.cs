@@ -45,11 +45,16 @@ public class MK_UI : ModuleRules
 				"Engine",
 				"PropertyPath",
 				"Slate",
-				"SlateCore",
+				"SlateCore", 
+				"PreLoadScreen",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
 		
+		if (Target.bBuildEditor == true)
+		{
+			PrivateDependencyModuleNames.Add("UnrealEd");
+		}
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
