@@ -34,10 +34,10 @@ private:
     void handleSliderMouseCaptureEnd();
     
     /************** Bound widgets ****************/
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UCommonNumericTextBlock* mSettingValue;
 
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UAnalogSlider* mSettingSlider;
     /************** Bound widgets ****************/
 

@@ -21,7 +21,7 @@ public:
     UCommonActivatableWidgetContainerBase* findWidgetStackByTag(const FGameplayTag& tag) const;
     
 protected:
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="MKUI")
     void registerWidgetStack(UPARAM(meta=(Categories="MKUI.widgetStack"))const FGameplayTag tag, UCommonActivatableWidgetContainerBase* stack);
     
 private:

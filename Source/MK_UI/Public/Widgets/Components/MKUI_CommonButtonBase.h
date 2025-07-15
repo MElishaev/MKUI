@@ -18,13 +18,13 @@ class MK_UI_API UMKUI_CommonButtonBase : public UCommonButtonBase
 	GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="MKUI")
     void setButtonText(const FText& text);
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="MKUI")
     void setButtonImg(const FSlateBrush& img);
     
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="MKUI")
     FText getButtonText() const;
     
 private:
@@ -42,7 +42,7 @@ private:
     UPROPERTY(meta=(BindWidgetOptional))
     UCommonTextBlock* mCommonButtonText;
 
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"), Category="MKUI")
     UCommonLazyImage* mButtonImg;
     /**** Bound widgets ****/
 

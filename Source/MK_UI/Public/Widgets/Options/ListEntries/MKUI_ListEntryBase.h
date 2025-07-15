@@ -71,7 +71,7 @@ protected:
     void selectThisEntryWidget();
 private:
     /******** bound widgets **********/
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional, AllowPrivateAccess="true"), Category="MKUI")
     UCommonTextBlock* mSettingDisplayName;
     /******** bound widgets **********/
 

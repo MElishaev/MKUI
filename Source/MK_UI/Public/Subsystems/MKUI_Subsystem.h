@@ -38,7 +38,7 @@ public:
 
     virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="MKUI")
     void registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget);
 
     /**

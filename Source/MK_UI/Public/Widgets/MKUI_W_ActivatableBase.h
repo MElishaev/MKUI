@@ -15,7 +15,7 @@ class MK_UI_API UMKUI_W_ActivatableBase : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
-    UFUNCTION(BlueprintPure)
+    UFUNCTION(BlueprintPure, Category="MKUI")
     AMKUI_PlayerController* getOwningPlayerController(); // todo change name and insert mkui pc 
     
 private:

@@ -37,10 +37,10 @@ private:
     void showBindConfirmationScreen(const FKey& keyToBind);
     
     /******** bound widgets **********/
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UMKUI_CommonButtonBase* mRemapKey;
 
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UMKUI_CommonButtonBase* mResetKeyMapping;
     /******** bound widgets **********/
     

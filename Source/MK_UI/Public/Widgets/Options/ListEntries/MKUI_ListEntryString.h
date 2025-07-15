@@ -31,13 +31,13 @@ private:
     void onRotatorClicked();
     void onRotatorValueChanged(int32 value, bool bUserInitiated);
     
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UMKUI_CommonButtonBase* mButtonPrev;
 
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UMKUI_CommonRotator* mOptionsRotator; // for gamepad - gives the possibility to rotate between the options in a specific setting
 
-    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"))
+    UPROPERTY(BlueprintReadOnly, meta=(BindWidget, AllowPrivateAccess="true"), Category="MKUI")
     UMKUI_CommonButtonBase* mButtonNext;
 
     UPROPERTY(Transient)

@@ -23,7 +23,7 @@ private:
     /**
      * This member maps subclasses of ListDataObjects to their appropriate ListEntries (e.g. string/bool/integer etc.)
      */
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category="MKUI")
     TMap<TSubclassOf<UMKUI_ListDataObjectBase>, TSubclassOf<UMKUI_ListEntryBase>> mClassToEntryMapping;
 
 };

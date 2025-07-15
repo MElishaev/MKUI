@@ -15,10 +15,10 @@ struct FConfirmScreenButtonInfo
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MKUI")
     EConfirmScreenButtonType mConfirmScreenButtonType = EConfirmScreenButtonType::Unknown;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MKUI")
     FText mButtonText;
 };
 
