@@ -3,12 +3,10 @@
 
 #include "Widgets/Options/MKUI_W_KeyRemapScreen.h"
 
-#include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
 #include "CommonRichTextBlock.h"
-#include "ICommonInputModule.h"
-#include "CommonUITypes.h"
 #include "Framework/Application/IInputProcessor.h"
+#include "Framework/Application/SlateApplication.h"
 
 /**
  * This class will be instantiated when we need to listen and process key pressed by the user in the UI.

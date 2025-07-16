@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Interfaces/MKUI_LoadingScreenObserver.h"
 #include "Settings/MKUI_LoadingScreenSettings.h"
+#include "Engine/GameInstance.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/Pawn.h"
 
 
 bool UMKUI_LoadingScreenSubsystem::ShouldCreateSubsystem(UObject* Outer) const

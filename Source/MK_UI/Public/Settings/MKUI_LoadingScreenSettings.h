@@ -2,6 +2,8 @@
 
 #pragma once
 
+class UUserWidget;
+
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 #include "MKUI_LoadingScreenSettings.generated.h"

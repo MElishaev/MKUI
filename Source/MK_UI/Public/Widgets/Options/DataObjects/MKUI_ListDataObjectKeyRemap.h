@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "MKUI_ListDataObjectBase.h"
+#include "Styling/SlateBrush.h"
 #include "MKUI_ListDataObjectKeyRemap.generated.h"
 
 struct FPlayerKeyMapping;
+struct FKey;
 enum class EPlayerMappableKeySlot : uint8;
 enum class ECommonInputType : uint8;
 class UEnhancedPlayerMappableKeyProfile;

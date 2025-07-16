@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Tickable.h"
 #include "MKUI_LoadingScreenSubsystem.generated.h"
+
+class SWidget;
 
 /**
  * Subsystem used to control loading screens in game. Accessible throughout the whole game instance

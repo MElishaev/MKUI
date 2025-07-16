@@ -3,6 +3,8 @@
 
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectScalar.h"
 #include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
+#include "String/LexFromString.h"
+
 
 float UMKUI_ListDataObjectScalar::getCurrentValue() const
 {

@@ -8,6 +8,8 @@
 #include "MKUI_DeveloperSettings.generated.h"
 
 class UMKUI_W_ActivatableBase;
+class UTexture2D;
+
 /**
  * 
  */

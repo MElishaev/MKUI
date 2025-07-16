@@ -8,6 +8,8 @@
 #include "UObject/Object.h"
 #include "MKUI_ListDataObjectBase.generated.h"
 
+class UTexture2D;
+
 /**
  * This class is a container for everything needed to be able to display the data for the
  * setting entry in the options menu.

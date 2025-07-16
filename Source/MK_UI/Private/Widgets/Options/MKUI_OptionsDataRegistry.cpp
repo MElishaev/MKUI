@@ -16,6 +16,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
+#include "Engine/LocalPlayer.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #define GET_DESCRIPTION(key) \
     LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)

@@ -2,6 +2,9 @@
 
 
 #include "Settings/MKUI_GameUserSettings.h"
+#include "Engine/Engine.h"
+#include "Misc/App.h"
+
 
 UMKUI_GameUserSettings::UMKUI_GameUserSettings() :
     mOverallVolume(1.f),

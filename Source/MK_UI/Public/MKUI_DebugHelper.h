@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Engine/Engine.h"
+
 namespace MKUI_Debug
 {
     static void print(const FString& msg, int32 key = -1, const FColor& color = FColor::MakeRandomColor())

@@ -8,6 +8,8 @@
 
 class UMKUI_ListDataObjectBase;
 class UMKUI_ListDataObjectCollection;
+class ULocalPlayer;
+
 /**
  * 
  */

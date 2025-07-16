@@ -2,7 +2,7 @@
 
 
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
-
+#include "InputCoreTypes.h"
 #include "CommonInputBaseTypes.h"
 #include "CommonInputSubsystem.h"
 #include "MKUI_DebugHelper.h"

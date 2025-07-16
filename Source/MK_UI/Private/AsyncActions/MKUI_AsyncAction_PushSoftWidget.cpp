@@ -2,7 +2,8 @@
 
 
 #include "AsyncActions/MKUI_AsyncAction_PushSoftWidget.h"
-
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Subsystems/MKUI_Subsystem.h"
 #include "Widgets/MKUI_W_ActivatableBase.h"
 

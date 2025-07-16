@@ -1,7 +1,8 @@
 // MAAKU Studio all rights reserved
 
 #include "Subsystems/MKUI_Subsystem.h"
-
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "MKUI_FunctionLibrary.h"
 #include "MKUI_GameplayTags.h"
 #include "Engine/AssetManager.h"
