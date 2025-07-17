@@ -39,6 +39,17 @@ void UMKUI_Subsystem::registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget)
     mPrimaryLayout = widget;
 }
 
+void UMKUI_Subsystem::removeAllWidgetsFromStack(UPARAM(meta=(Categories="MKUI.widgetStack")) const FGameplayTag widgetStackTag)
+{
+    if (!mPrimaryLayout) {
+        UE_LOG(LogTemp, Error, TEXT("Primary layout wasn't set yet"));
+        return;
+    }
+
+    auto widgetStack = mPrimaryLayout->findWidgetStackByTag(widgetStackTag);
+    widgetStack->ClearWidgets();
+}
+
 void UMKUI_Subsystem::pushSoftWidgetToStackAsync(const FGameplayTag& widgetStackTag,
                                                  TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
                                                  TFunction<void(EAsyncPushWidgetState, UMKUI_W_ActivatableBase*)> asyncPushStateCallback)

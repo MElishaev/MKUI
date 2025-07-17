@@ -23,9 +23,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnButtonDescriptionUpdated, UMKUI_
 
 /**
  * This subsystem act as an easy access to the UI and widgets system in the game.
- * (not sure why this can't be in HUD - though one reason can be that HUD must be
- * accessed through PlayerController which could be small annoyance, adding 1 more
- * indirection)
  */
 UCLASS()
 class MK_UI_API UMKUI_Subsystem : public UGameInstanceSubsystem
@@ -40,6 +37,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="MKUI")
     void registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget);
+
+    UFUNCTION(BlueprintCallable, Category="MKUI")
+    void removeAllWidgetsFromStack(UPARAM(meta=(Categories="MKUI.widgetStack")) const FGameplayTag widgetStackTag);
 
     /**
      * This method pushed the soft pointer of a widget to the stack specified by the tag and calls the
