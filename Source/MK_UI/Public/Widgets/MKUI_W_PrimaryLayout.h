@@ -10,7 +10,11 @@
 class UCommonActivatableWidgetContainerBase;
 
 /**
- * This class acts as a container that holds all the other widgets we use
+ * This class acts as a container that holds all the other widgets we use.
+ * It holds the possible stacks for different UI sections of your game, for example, it can hold the UI stacks of
+ * HUD, main menu, pause menu, modals etc.
+ * Every UI element should be pushed to one of the available stacks and if needed, additional stacks can be added
+ * through first adding declaring and defining the stack in the MKUI_GameplayTags.h.
  */
 UCLASS(Abstract, BlueprintType, meta=(DisableNativeTick))
 class MK_UI_API UMKUI_W_PrimaryLayout : public UCommonUserWidget

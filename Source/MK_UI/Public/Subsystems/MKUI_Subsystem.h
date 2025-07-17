@@ -42,15 +42,14 @@ public:
     void registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget);
 
     /**
-     * This method pushed the soft pointer of a widget to the stack specified by widget tag and calls the
+     * This method pushed the soft pointer of a widget to the stack specified by the tag and calls the
      * callback before and after the widget is pushed to the stack (this loads the widget from disk if not loaded)
-     * @param widgetTag widget tag to which we want to add the loaded widget
+     * @param widgetStackTag widget stack tag to which we want to add the loaded widget
      * @param widgetClass soft pointer to the widget we want to load
      * @param asyncPushStateCallback callbacks for before and after widget is pushed to the stack -
      *                               the state is specified by EAsyncPushWidgetState input param 
      */
-
-    void pushSoftWidgetToStackAsync(const FGameplayTag& widgetTag,
+    void pushSoftWidgetToStackAsync(const FGameplayTag& widgetStackTag,
                                     TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
                                     TFunction<void(EAsyncPushWidgetState, UMKUI_W_ActivatableBase*)> asyncPushStateCallback);
 
@@ -65,6 +64,7 @@ public:
     FOnButtonDescriptionUpdated onButtonDescUpdated;
 
 private:
+    // This is the primary layout that holds the widget stacks of the entire UI in the game. See class doc for more info.
     UPROPERTY(Transient)
-    UMKUI_W_PrimaryLayout* mPrimaryLayout; // primary layout that holds all the widgets
+    UMKUI_W_PrimaryLayout* mPrimaryLayout;
 };

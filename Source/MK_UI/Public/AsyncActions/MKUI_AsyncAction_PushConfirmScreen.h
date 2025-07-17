@@ -12,7 +12,7 @@ enum class EConfirmScreenType : uint8;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConfirmButtonClicked, EConfirmScreenButtonType, buttonType);
 
 /**
- * 
+ * @see MKUI_AsyncAction_PushSoftWidget for explanation of async actions 
  */
 UCLASS()
 class MK_UI_API UMKUI_AsyncAction_PushConfirmScreen : public UBlueprintAsyncActionBase

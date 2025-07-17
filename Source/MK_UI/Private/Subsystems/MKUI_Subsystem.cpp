@@ -39,7 +39,7 @@ void UMKUI_Subsystem::registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget)
     mPrimaryLayout = widget;
 }
 
-void UMKUI_Subsystem::pushSoftWidgetToStackAsync(const FGameplayTag& widgetTag,
+void UMKUI_Subsystem::pushSoftWidgetToStackAsync(const FGameplayTag& widgetStackTag,
                                                  TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
                                                  TFunction<void(EAsyncPushWidgetState, UMKUI_W_ActivatableBase*)> asyncPushStateCallback)
 {
@@ -47,12 +47,16 @@ void UMKUI_Subsystem::pushSoftWidgetToStackAsync(const FGameplayTag& widgetTag,
 
     UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
         widgetClass.ToSoftObjectPath(),
-        FStreamableDelegate::CreateLambda( // called when loading is finished
-            [this, widgetClass, widgetTag, asyncPushStateCallback]() {
+        // called when loading is finished - there is no real difference between passing c++ lambda immediately apart from that if we pass
+        // c++ lambda, there is an implicit conversion, which UE supports, of the lambda to FStreamableDelegate.
+        // But overall, this method expects the UE FStreamableDelegate as a lambda.
+        FStreamableDelegate::CreateLambda(
+            [this, widgetClass, widgetStackTag, asyncPushStateCallback]() {
                 const auto loadedWidget = widgetClass.Get();
                 check(loadedWidget && mPrimaryLayout);
 
-                const auto widgetStack = mPrimaryLayout->findWidgetStackByTag(widgetTag);
+                const auto widgetStack = mPrimaryLayout->findWidgetStackByTag(widgetStackTag);
+                // creating callback to pass because this is not yet the place where we call the "before push" callback
                 auto widgetInitFunc = [&](UMKUI_W_ActivatableBase& createdWidgetInstance) {
                     asyncPushStateCallback(EAsyncPushWidgetState::OnCreatedBeforePush, &createdWidgetInstance);
                 };

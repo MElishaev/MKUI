@@ -35,16 +35,15 @@ UMKUI_AsyncAction_PushSoftWidget* UMKUI_AsyncAction_PushSoftWidget::pushSoftWidg
 
 void UMKUI_AsyncAction_PushSoftWidget::Activate()
 {
-    auto uiSubsystem = mCachedOwningWorld->GetGameInstance()->GetSubsystem<UMKUI_Subsystem>();
-
+    // callback for pushing the widget (to control what happens just before the push and after the push)
     auto asyncPushStateCallback = [this](EAsyncPushWidgetState pushState, UMKUI_W_ActivatableBase* pushedWidget) {
         switch (pushState) {
             case EAsyncPushWidgetState::OnCreatedBeforePush:
                 pushedWidget->SetOwningPlayer(mCachedOwningPC.Get());
-                onWidgetCreatedBeforePush.Broadcast(pushedWidget);
+                onWidgetCreatedBeforePush.Broadcast(pushedWidget); // executes the flow out of the corresponding pin of the BPNode
                 break;
             case EAsyncPushWidgetState::AfterPush:
-                afterPush.Broadcast(pushedWidget);
+                afterPush.Broadcast(pushedWidget); // executes the flow out of the corresponding pin of the BPNode
                 if (mbCachedFocusOnNewlyPushedWidget) {
                     if (const auto widgetToFocus = pushedWidget->GetDesiredFocusTarget()) {
                         widgetToFocus->SetFocus();
@@ -55,5 +54,6 @@ void UMKUI_AsyncAction_PushSoftWidget::Activate()
         }
     };
 
+    const auto uiSubsystem = mCachedOwningWorld->GetGameInstance()->GetSubsystem<UMKUI_Subsystem>();
     uiSubsystem->pushSoftWidgetToStackAsync(mCachedGameplayTag, mCachedWidgetClass, asyncPushStateCallback);
 }

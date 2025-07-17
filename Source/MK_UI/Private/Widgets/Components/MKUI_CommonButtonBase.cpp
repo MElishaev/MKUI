@@ -17,7 +17,13 @@ void UMKUI_CommonButtonBase::setButtonText(const FText& text)
 void UMKUI_CommonButtonBase::setButtonImg(const FSlateBrush& img)
 {
     if (mButtonImg) {
-        mButtonImg->SetBrush(img);
+        // todo - is this fix really needed?
+        if (auto tex = Cast<UTexture2D>(img.GetResourceObject())) {
+            mButtonImg->SetBrushFromTexture(tex);
+        }
+        else {
+            mButtonImg->SetBrush(img);
+        }
     }
 }
 
