@@ -11,3 +11,10 @@ TSubclassOf<UUserWidget> UMKUI_LoadingScreenSettings::getLoadingScreenWidgetClas
     TSubclassOf<UUserWidget> loadedWidget = mSoftLoadingScreenWidgetClass.LoadSynchronous();
     return loadedWidget;
 }
+
+UDataTable* UMKUI_LoadingScreenSettings::getLoadingConditionsDataTable() const
+{
+    checkf(!mLoadingConditionsTable.IsNull(), TEXT("No loading conditions data table was set in loading screen project settings"));
+    const auto dt = mLoadingConditionsTable.LoadSynchronous();
+    return dt;    
+}

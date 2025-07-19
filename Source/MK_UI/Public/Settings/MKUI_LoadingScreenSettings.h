@@ -21,6 +21,8 @@ public:
     // this class will load the soft ptr of loading screen widget and return it to the caller
     TSubclassOf<UUserWidget> getLoadingScreenWidgetClassChecked() const;
 
+    UDataTable* getLoadingConditionsDataTable() const;
+
     
     UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
     TSoftClassPtr<UUserWidget> mSoftLoadingScreenWidgetClass; // the widget we want to show as the loading screen
@@ -31,5 +33,9 @@ public:
 
     UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
     bool mbShowLoadingScreenInEditor = false;
+
+    // data table representing the loading conditions for each level, where each row corresponds to 1 level.
+    UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
+    TSoftObjectPtr<UDataTable> mLoadingConditionsTable;
 
 };
