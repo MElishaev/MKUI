@@ -44,6 +44,7 @@ void UMKUI_AsyncAction_PushSoftWidget::Activate()
                 break;
             case EAsyncPushWidgetState::AfterPush:
                 afterPush.Broadcast(pushedWidget); // executes the flow out of the corresponding pin of the BPNode
+                UE_LOG(LogTemp, Warning, TEXT("Pushed widget %s to %s"), *pushedWidget->GetName(), *mCachedGameplayTag.ToString());
                 if (mbCachedFocusOnNewlyPushedWidget) {
                     if (const auto widgetToFocus = pushedWidget->GetDesiredFocusTarget()) {
                         widgetToFocus->SetFocus();
