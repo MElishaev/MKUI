@@ -9,7 +9,7 @@
 /**
  * This class stores and loads and applies the game user settings
  */
-UCLASS()
+UCLASS(BlueprintType)
 class MK_UI_API UMKUI_GameUserSettings : public UGameUserSettings
 {
     GENERATED_BODY()
@@ -28,22 +28,22 @@ public:
     /******** Gameplay collection tab *********/
 
     /******** Audio collection tab *********/
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     float getOverallVolume() const { return mOverallVolume; }
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     void setOverallVolume(float vol);
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     float getMusicVolume() const { return mMusicVolume; }
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     void setMusicVolume(float vol);
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     float getSFXVolume() const { return mSFXVolume; }
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable, Category="MKUI Settings")
     void setSFXVolume(float vol);
 
     UFUNCTION()

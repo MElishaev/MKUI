@@ -65,11 +65,6 @@ void UMKUI_ListDataObjectString::onRotatorInitiatedValueChange(const FText& newS
 
 void UMKUI_ListDataObjectString::onDataObjectInitialized()
 {
-    // if (!mAvailableOptionsStrings.IsEmpty()) {
-    //     // todo: is there a better way to choose the default values for settings?
-    //     mCurrentValueString = mAvailableOptionsStrings[0];
-    // }
-
     if (hasDefaultValue()) {
         mCurrentValueString = getDefaultValueAsString();
     }

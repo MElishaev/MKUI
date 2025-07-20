@@ -10,9 +10,7 @@
 #include "Sound/SoundMix.h"
 
 
-UMKUI_GameUserSettings::UMKUI_GameUserSettings() :
-    mOverallVolume(1.f),
-    mMusicVolume(1.f), mSFXVolume(1.f), mbAllowBackgroundAudio(true), mbUseHDRAudioMode(false)
+UMKUI_GameUserSettings::UMKUI_GameUserSettings()
 {
 
 }
