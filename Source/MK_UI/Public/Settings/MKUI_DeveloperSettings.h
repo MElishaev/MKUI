@@ -25,4 +25,15 @@ public:
     UPROPERTY(Config, EditAnywhere, Category="MKUI Options Image Reference", meta=(ForceInlineRow, Categories="MKUI.image.testImage"))
     TMap<FGameplayTag, TSoftObjectPtr<UTexture2D>> mOptionsScreenSoftImageMap;
 
+    UPROPERTY(Config, EditAnywhere, Category = "Audio", meta = (AllowedClasses = "/Script/Engine.SoundClass"))
+    FSoftObjectPath mMasterSoundClass;
+ 
+    UPROPERTY(Config, EditAnywhere, Category = "Audio", meta = (AllowedClasses = "/Script/Engine.SoundClass"))
+    FSoftObjectPath mMusicSoundClass;
+ 
+    UPROPERTY(Config, EditAnywhere, Category = "Audio", meta = (AllowedClasses = "/Script/Engine.SoundClass"))
+    FSoftObjectPath mSoundFXSoundClass;
+ 
+    UPROPERTY(Config, EditAnywhere, Category = "Audio", meta = (AllowedClasses = "/Script/Engine.SoundMix"))
+    FSoftObjectPath mDefaultSoundMix;
 };

@@ -16,9 +16,8 @@ class MK_UI_API UMKUI_W_ActivatableBase : public UCommonActivatableWidget
 	GENERATED_BODY()
 
     UFUNCTION(BlueprintPure, Category="MKUI")
-    AMKUI_PlayerController* getOwningPlayerController(); // todo change name and insert mkui pc 
+    AMKUI_PlayerController* getOwningPlayerController();
     
 private:
-    // todo - is it ok to not flag it as UPROPERTY? it is a pointer
     TWeakObjectPtr<AMKUI_PlayerController> mCachedOwningPC;
 };
