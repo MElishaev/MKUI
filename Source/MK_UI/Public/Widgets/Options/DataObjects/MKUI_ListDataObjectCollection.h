@@ -20,6 +20,8 @@ public:
     virtual TArray<UMKUI_ListDataObjectBase*> getAllChildListData() const override;
 
     virtual bool hasAnyChildData() const override;
+
+    void sortByName();
     
 private:
     UPROPERTY(Transient)

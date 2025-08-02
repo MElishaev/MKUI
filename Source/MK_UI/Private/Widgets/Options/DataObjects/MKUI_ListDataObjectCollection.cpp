@@ -7,7 +7,7 @@ void UMKUI_ListDataObjectCollection::addChildListData(UMKUI_ListDataObjectBase* 
 {
     dataToAdd->initDataObject();
     dataToAdd->setmParentData(this);
-    mChildListDataArray.Add(dataToAdd); 
+    mChildListDataArray.Add(dataToAdd);
 }
 
 TArray<UMKUI_ListDataObjectBase*> UMKUI_ListDataObjectCollection::getAllChildListData() const
@@ -18,4 +18,11 @@ TArray<UMKUI_ListDataObjectBase*> UMKUI_ListDataObjectCollection::getAllChildLis
 bool UMKUI_ListDataObjectCollection::hasAnyChildData() const
 {
     return !mChildListDataArray.IsEmpty();
+}
+
+void UMKUI_ListDataObjectCollection::sortByName()
+{
+    mChildListDataArray.Sort([](UMKUI_ListDataObjectBase& a, UMKUI_ListDataObjectBase& b) {
+        return a.getmDataId().Compare(b.getmDataId()) < 0;
+    });
 }

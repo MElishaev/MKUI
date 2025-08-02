@@ -6,6 +6,7 @@
 #include "Widgets/MKUI_W_ActivatableBase.h"
 #include "MKUI_W_OptionsScreen.generated.h"
 
+enum class ECommonInputType : uint8;
 enum class EOptionsListDataModifiedReason : uint8;
 class UMKUI_ListDataObjectBase;
 class UMKUI_OptionsDetailsPanel;
@@ -45,6 +46,8 @@ private:
 
     // helper method tries to return the input object class name or "invalid" if couldn't
     FString tryGetEntryWidgetClassName(UObject* owningListItem) const;
+
+    void handleInputTypeChanged(ECommonInputType currentInputType);
     
     /**** bound widgets ****/
     UPROPERTY(meta=(BindWidget))
@@ -65,13 +68,19 @@ private:
     UMKUI_OptionsDataRegistry* mDataRegistry;
     
     // taking inspiration from how commonUI does it in the CommonUIInputData class, we will add custom bound actions
-    UPROPERTY(EditDefaultsOnly, Category = "MKUI Options Screen", meta = (EditCondition = "CommonInput.CommonInputSettings.IsEnhancedInputSupportEnabled", EditConditionHides))
+    UPROPERTY(EditDefaultsOnly, Category = "MKUI", meta = (EditCondition = "CommonInput.CommonInputSettings.IsEnhancedInputSupportEnabled", EditConditionHides))
     TObjectPtr<UInputAction> mEnhancedInputResetAction; // reset settings input actions
 
+    UPROPERTY(EditDefaultsOnly, Category = "MKUI")
+    bool mbFilterForRegisteredIMCs = true;
+    
     FUIActionBindingHandle mResetActionHandle; // handle for removal of the action button from the BoundActionsBar
 
     UPROPERTY(Transient)
     TArray<UMKUI_ListDataObjectBase*> mResettableDataArray;
 
     bool mbIsResettingData = false;
+    bool mbRecreateControlsTab = false;
+    FName mCurrentTabId;
+    ECommonInputType mCurrentInputType;
 };

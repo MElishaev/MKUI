@@ -3,6 +3,7 @@
 
 #include "Widgets/Options/MKUI_OptionsDataRegistry.h"
 
+#include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
 #include "MKUI_FunctionLibrary.h"
 #include "MKUI_GameplayTags.h"
@@ -14,10 +15,14 @@
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectStringResolution.h"
 #include "Internationalization/StringTableRegistry.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedActionKeyMapping.h"
+#include "InputMappingContext.h"
+#include "PlayerMappableKeySettings.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
 #include "Engine/LocalPlayer.h"
 #include "Runtime/Launch/Resources/Version.h"
+
 
 #define GET_DESCRIPTION(key) \
     LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)
@@ -591,8 +596,24 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
     mRegisteredTabCollections.Add(videoTabCollection);
 }
 
-void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLocalPlayer)
+void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLocalPlayer, const bool bRecreateControlsTab, const bool bFilterForRegisteredIMCs)
 {
+    ensureMsgf(ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 6, 
+                    TEXT("%s: Starting with 5.6 use eiUserSettings->GetAllAvailableKeyProfiles()! "
+                         "Else just fails with no mappings returned..."),
+                    *FString::Printf(TEXT(__FUNCTION__)));
+
+    // bug: this crashes when input type changes mid key remap screen
+    if (bRecreateControlsTab) {
+        auto controlsTab = mRegisteredTabCollections.FindByPredicate([](const UMKUI_ListDataObjectCollection* tabCollection) {
+            return tabCollection->getmDataId() == FName("controlsTabCollection");
+        });
+        if (controlsTab) {
+            (*controlsTab)->ConditionalBeginDestroy(); // todo: is this needed? if removing the tab from array it won't be referenced anymore and flagged by UE for GCed
+            mRegisteredTabCollections.Remove(*controlsTab);
+        }
+    }
+    
     const auto controlsTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     controlsTabCollection->setmDataId(FName("controlsTabCollection"));
     controlsTabCollection->setmDataDisplayName(FText::FromString(TEXT("Controls")));
@@ -602,88 +623,83 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
     auto eiUserSettings = eiSubsystem->GetUserSettings();
     check(eiUserSettings);
 
-    // mouse and keyboard collection
+    // Get all IDs for CURRENTLY registered IMCs only - the only way I found to filter content from unregistered IMCs
+    // which have been previously registered
+    TArray<FName> registeredPlayerMappableKeySettingNames;
+    if (bFilterForRegisteredIMCs)
     {
-        const auto keyboardMouseCollection = NewObject<UMKUI_ListDataObjectCollection>();
-        keyboardMouseCollection->setmDataId(FName("keyboardMouseCollection"));
-        keyboardMouseCollection->setmDataDisplayName(FText::FromString(TEXT("Mouse & Keyboard")));
-
-        controlsTabCollection->addChildListData(keyboardMouseCollection);
-
-        // keyboard and mouse inputs
+        const TSet<TObjectPtr<const UInputMappingContext>>& registeredIMCs = eiUserSettings->GetRegisteredInputMappingContexts();
+        for (const UInputMappingContext* registeredIMC : registeredIMCs)
         {
-            FPlayerMappableKeyQueryOptions keyboardMouseFilter;
-            keyboardMouseFilter.KeyToMatch = EKeys::S; // set here any keyboard key
-            // true here means that filter passes only for keys that return true for what the above key returns
-            // true to on the following queries:  IsGamepadKey, IsTouch, and IsGesture - which actually came to pass only keyboard&mouse keys
-            keyboardMouseFilter.bMatchBasicKeyTypes = true;
-
-            ensureMsgf(ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 6, 
-                TEXT("%s: Starting with 5.6 use EIUserSettings->GetAllAvailableKeyProfiles()! Else just fails with no mappings returned..."),
-                *FString::Printf(TEXT(__FUNCTION__)));
-            
-            for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
-                // we don't care about the key of the pair because we have only one profile
-                auto mappableKeyProfile = profilePair.Value;
-                check(mappableKeyProfile);
-
-                // for each profile, get all the mappings, and for each mapping run over all mapped keys
-                for (const auto& mappingRowPair : mappableKeyProfile->GetPlayerMappingRows()) {
-                    for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
-                        // each IA can have few mapped keys (like gamepad and keyboard)
-                        if (mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, keyboardMouseFilter)) {
-                            auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
-                            keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
-                            keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
-                            keyRemapDataObj->initKeyRemapData(eiUserSettings,
-                                                              mappableKeyProfile,
-                                                              ECommonInputType::MouseAndKeyboard,
-                                                              playerKeyMapping);
-                            keyboardMouseCollection->addChildListData(keyRemapDataObj);
-                        }
-                    }
+            TArray<FEnhancedActionKeyMapping> mappings = registeredIMC->GetMappings();
+            for (FEnhancedActionKeyMapping mapping : mappings)
+            {
+                if (UPlayerMappableKeySettings* keySettings = mapping.GetPlayerMappableKeySettings())
+                {
+                    registeredPlayerMappableKeySettingNames.AddUnique(keySettings->GetMappingName());
                 }
             }
         }
     }
 
-    // gamepad collection - comment out if not needed or todo - implement a way so that can be toggled on or off through BP
-    {
-        const auto gamepadCollection = NewObject<UMKUI_ListDataObjectCollection>();
-        gamepadCollection->setmDataId(FName("gamepadCollection"));
-        gamepadCollection->setmDataDisplayName(FText::FromString(TEXT("Gamepad")));
+    UCommonInputSubsystem* commonInputSubsystem = UCommonInputSubsystem::Get(owningLocalPlayer);
+    check(commonInputSubsystem);
+    
+    ECommonInputType currentInputType = commonInputSubsystem->GetCurrentInputType();
+    FPlayerMappableKeyQueryOptions inputTypeFilter;
+    inputTypeFilter.KeyToMatch = currentInputType == ECommonInputType::MouseAndKeyboard ? EKeys::S : EKeys::Gamepad_LeftShoulder;
+    // true here means that filter passes only for keys that return true for what the above key returns
+    // true to on the following queries:  IsGamepadKey, IsTouch, and IsGesture - which actually came to pass only keyboard&mouse keys
+    inputTypeFilter.bMatchBasicKeyTypes = true;
 
-        controlsTabCollection->addChildListData(gamepadCollection);
+    TMap<FName, UMKUI_ListDataObjectCollection*> displayCategoryCollections;
+    for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
+        // we don't care about the key of the pair because we have only one profile
+        auto mappableKeyProfile = profilePair.Value;
+        check(mappableKeyProfile);
 
-        // gamepad inputs
-        {
-            FPlayerMappableKeyQueryOptions gamepadFilter;
-            gamepadFilter.KeyToMatch = EKeys::Gamepad_RightShoulder;
-            gamepadFilter.bMatchBasicKeyTypes = true;
+        // for each profile, get all the mappings, and for each mapping run over all mapped keys
+        for (const auto& mappingRowPair : mappableKeyProfile->GetPlayerMappingRows()) {
+            for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
 
-            for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
-                // we don't care about the key of the pair because we have only one profile
-                auto mappableKeyProfile = profilePair.Value;
-                check(mappableKeyProfile);
+                // Filter mappings that should not be added to the options
+                // - Those found in EnhancedInputUserSettings.sav which are not currently registered (no IA associated)
+                // - Those not matching the current InputType
+                // - Those IDs, which are not part of any currently registered IMC
+                if (playerKeyMapping.GetAssociatedInputAction() == nullptr ||
+                    !mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, inputTypeFilter) ||
+                    (bFilterForRegisteredIMCs && !registeredPlayerMappableKeySettingNames.Contains(playerKeyMapping.GetMappingName()))) {
+                    continue;
+                }    
+                
+                auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
+                keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
+                keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
+                keyRemapDataObj->initKeyRemapData(eiUserSettings, mappableKeyProfile, currentInputType, playerKeyMapping);
 
-                // for each profile, get all the mappings, and for each mapping run over all mapped keys
-                for (const auto& mappingRowPair : mappableKeyProfile->GetPlayerMappingRows()) {
-                    for (const auto& playerKeyMapping : mappingRowPair.Value.Mappings) {
-                        // each IA can have few mapped keys (like gamepad and keyboard)
-                        if (mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, gamepadFilter)) {
-                            auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
-                            keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
-                            keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
-                            keyRemapDataObj->initKeyRemapData(eiUserSettings,
-                                                              mappableKeyProfile,
-                                                              ECommonInputType::Gamepad,
-                                                              playerKeyMapping);
-                            gamepadCollection->addChildListData(keyRemapDataObj);
-                        }
-                    }
+                // setting the display categories for the keys - for example: driving / swimming controls etc.
+                FText displayCategory = playerKeyMapping.GetDisplayCategory().IsEmpty()
+                    ? FText::FromString(TEXT("General"))
+                    : playerKeyMapping.GetDisplayCategory();
+                FName categoryName(displayCategory.ToString());
+                if (!displayCategoryCollections.Contains(categoryName)) {
+                    const auto collection = NewObject<UMKUI_ListDataObjectCollection>();
+                    collection->setmDataId(categoryName);
+                    collection->setmDataDisplayName(displayCategory);
+                    displayCategoryCollections.Add(categoryName, collection);
+                    collection->addChildListData(keyRemapDataObj);
+                }
+                else {
+                    displayCategoryCollections.FindRef(categoryName)->addChildListData(keyRemapDataObj);
                 }
             }
         }
+    }
+
+    displayCategoryCollections.KeySort([](FName A, FName B) { return A.Compare(B) < 0; }); // sorts the categories
+    for (const auto& displayCategoryPair : displayCategoryCollections) {
+        displayCategoryPair.Value->sortByName(); // sorts the actions in each category
+        controlsTabCollection->addChildListData(displayCategoryPair.Value);
     }
 
     mRegisteredTabCollections.Add(controlsTabCollection);

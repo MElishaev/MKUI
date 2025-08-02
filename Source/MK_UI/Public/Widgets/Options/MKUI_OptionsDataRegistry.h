@@ -25,14 +25,15 @@ public:
     const TArray<UMKUI_ListDataObjectCollection*>& getRegisteredTabCollections() const { return mRegisteredTabCollections; } 
     
     TArray<UMKUI_ListDataObjectBase*> getListSourceItemsBySelectedTabId(const FName tabId) const;
-    
+
+    void initControlCollectionTab(ULocalPlayer* owningLocalPlayer, const bool bRecreateControlsTab=false, const bool bFilterForRegisteredIMCs=false);
+
 private:
     void findChildListDataRecursively(UMKUI_ListDataObjectBase* parentData, TArray<UMKUI_ListDataObjectBase*>& foundChildren) const;
     
     void initGameplayCollectionTab();
     void initAudioCollectionTab();
     void initVideoCollectionTab();
-    void initControlCollectionTab(ULocalPlayer* owningLocalPlayer);
     
     UPROPERTY(Transient)
     TArray<UMKUI_ListDataObjectCollection*> mRegisteredTabCollections; // todo: why not map?

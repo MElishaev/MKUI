@@ -98,8 +98,10 @@ private:
     // should be careful with enabling it for values that can change every frame, like sliders
     bool mbShouldApplySettingImmediately = false; 
 
+    // the data container that holds this list data object (e.g. for the screen resolution setting the parent
+    // will be the Display category which parent will be the video tab collection)
     UPROPERTY(Transient)
-    UMKUI_ListDataObjectBase* mParentData;
+    UMKUI_ListDataObjectBase* mParentData; 
     
     UPROPERTY(Transient)
     TArray<FOptionsDataEditConditionDescriptor> mEditConditions; // stores the conditions that needs to be met to edit this entry option

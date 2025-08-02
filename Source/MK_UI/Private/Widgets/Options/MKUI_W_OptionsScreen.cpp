@@ -4,7 +4,6 @@
 #include "Widgets/Options/MKUI_W_OptionsScreen.h"
 
 #include "ICommonInputModule.h"
-#include "MKUI_DebugHelper.h"
 #include "Input/CommonUIInputTypes.h"
 #include "Settings/MKUI_GameUserSettings.h"
 #include "Subsystems/MKUI_Subsystem.h"
@@ -45,8 +44,10 @@ void UMKUI_W_OptionsScreen::NativeOnInitialized()
     RegisterUIActionBinding(backActionArgs);
 
     mOptionsTabList->OnTabSelected.AddUniqueDynamic(this, &UMKUI_W_OptionsScreen::onOptionsTabSelected);
-    mOptionsList->OnItemIsHoveredChanged().AddUObject(this, &ThisClass::onListViewItemHovered);  // bind callback for item hovered state
-    mOptionsList->OnItemSelectionChanged().AddUObject(this, &ThisClass::onListViewItemSelected); // bind callback for item hovered state
+    mOptionsList->OnItemIsHoveredChanged().AddUObject(this, &ThisClass::onListViewItemHovered);
+    mOptionsList->OnItemSelectionChanged().AddUObject(this, &ThisClass::onListViewItemSelected);
+    GetInputSubsystem()->OnInputMethodChangedNative.AddUObject(this, &ThisClass::handleInputTypeChanged);
+    mCurrentInputType = GetInputSubsystem()->GetCurrentInputType();
 }
 
 void UMKUI_W_OptionsScreen::NativeOnDeactivated()
@@ -140,9 +141,18 @@ void UMKUI_W_OptionsScreen::onBackBoundActionTriggered()
 
 void UMKUI_W_OptionsScreen::onOptionsTabSelected(FName tabId)
 {
+    UE_LOG(LogTemp, Log, TEXT("Selected tab is %s"), *tabId.ToString());
+    mCurrentTabId = tabId;
+    
     // clear previous details - SetSelectedIndex() below will trigger the update details panel with the first setting in the tab
     mListEntryDetailsPanel->clearDetailsPanelInfo();
+    
+    if (mbRecreateControlsTab && tabId == FName(TEXT("controlsTabCollection"))) {
+        getDataRegistry()->initControlCollectionTab(GetOwningLocalPlayer(), mbRecreateControlsTab, mbFilterForRegisteredIMCs);
+        mbRecreateControlsTab = false;
+    }
 
+    // todo: maybe rename optionsList->tabOptionEntries
     const auto optionsList = getDataRegistry()->getListSourceItemsBySelectedTabId(tabId);
     mOptionsList->SetListItems(optionsList);
     mOptionsList->RequestRefresh();
@@ -244,4 +254,21 @@ FString UMKUI_W_OptionsScreen::tryGetEntryWidgetClassName(UObject* owningListIte
         return foundEntry->GetClass()->GetName();
     }
     return TEXT("Entry widget not valid");
+}
+
+void UMKUI_W_OptionsScreen::handleInputTypeChanged(ECommonInputType currentInputType)
+{
+    UE_LOG(LogTemp, Warning, TEXT("input type changed...%d"), currentInputType);
+    // in 5.5 there is a bug where broadcasting input type change happens even when the input type didn't change.
+    // this was fixed in 5.6, but this bug is the reason for the below check and the mCurrentInputType member exist
+    // could be removed in 5.6
+    if (mCurrentInputType == currentInputType) {
+        return;
+    }
+    mCurrentInputType = currentInputType;
+    
+    if (mCurrentTabId == FName(TEXT("controlsTabCollection"))) {
+        mbRecreateControlsTab = true;
+        onOptionsTabSelected(FName(TEXT("controlsTabCollection")));
+    }
 }
