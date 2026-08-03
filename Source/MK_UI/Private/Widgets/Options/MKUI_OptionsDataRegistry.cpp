@@ -653,7 +653,7 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
     inputTypeFilter.bMatchBasicKeyTypes = true;
 
     TMap<FName, UMKUI_ListDataObjectCollection*> displayCategoryCollections;
-    for (const auto& profilePair : eiUserSettings->GetAllSavedKeyProfiles()) {
+    for (const auto& profilePair : eiUserSettings->GetAllAvailableKeyProfiles()) {
         // we don't care about the key of the pair because we have only one profile
         auto mappableKeyProfile = profilePair.Value;
         check(mappableKeyProfile);

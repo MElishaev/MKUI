@@ -22,7 +22,7 @@ enum class EAsyncPushWidgetState : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnButtonDescriptionUpdated, UMKUI_CommonButtonBase*, button, FText, description);
 
 /**
- * This subsystem act as an easy access to the UI and widgets system in the game.
+ * This subsystem act as easy access to the UI and widgets system in the game.
  */
 UCLASS()
 class MK_UI_API UMKUI_Subsystem : public UGameInstanceSubsystem
@@ -34,6 +34,8 @@ public:
     static UMKUI_Subsystem* getInstance(const UObject* worldContextObject);
 
     virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+
+    virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
     UFUNCTION(BlueprintCallable, Category="MKUI")
     void registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget);

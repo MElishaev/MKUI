@@ -11,6 +11,7 @@
 #include "Widgets/MKUI_W_PrimaryLayout.h"
 #include "MKUITypes/MKUIEnumTypes.h"
 #include "Widgets/MKUI_W_ConfirmScreen.h"
+#include "Framework/Application/NavigationConfig.h"
 
 
 UMKUI_Subsystem* UMKUI_Subsystem::getInstance(const UObject* worldContextObject)
@@ -31,6 +32,19 @@ bool UMKUI_Subsystem::ShouldCreateSubsystem(UObject* Outer) const
         return classes.IsEmpty();
     }
     return false;
+}
+
+void UMKUI_Subsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+    Super::Initialize(Collection);
+
+    const TSharedRef<FNavigationConfig> navigationConfig = FSlateApplication::Get().GetNavigationConfig();
+
+    navigationConfig.Get().KeyEventRules.Emplace(EKeys::W, EUINavigation::Up);
+    navigationConfig.Get().KeyEventRules.Emplace(EKeys::A, EUINavigation::Left);
+    navigationConfig.Get().KeyEventRules.Emplace(EKeys::S, EUINavigation::Down);
+    navigationConfig.Get().KeyEventRules.Emplace(EKeys::D, EUINavigation::Right);
+    FSlateApplication::Get().SetNavigationConfig(navigationConfig);
 }
 
 void UMKUI_Subsystem::registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget)

@@ -7,6 +7,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "MKUI_DeveloperSettings.generated.h"
 
+class UInputMappingContext;
 class UMKUI_W_ActivatableBase;
 class UTexture2D;
 
@@ -19,6 +20,9 @@ class MK_UI_API UMKUI_DeveloperSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+    UPROPERTY(Config, EditAnywhere, Category = "Input")
+    TSoftObjectPtr<UInputMappingContext> mInputMappingContext; // for setting the Generic input mapping for navigation and button slates
+    
     UPROPERTY(Config, EditAnywhere, Category="Widget Reference", meta=(ForceInlineRow, Categories="MKUI.widget"))
     TMap<FGameplayTag, TSoftClassPtr<UMKUI_W_ActivatableBase>> mWidgetMap;
 

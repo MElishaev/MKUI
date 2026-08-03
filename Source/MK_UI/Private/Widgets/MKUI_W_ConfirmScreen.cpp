@@ -68,6 +68,14 @@ void UMKUI_W_ConfirmScreen::initConfirmScreen(UConfirmScreenInfoObject* infoObje
     mTitle->SetText(infoObject->mScreenTitle);
     mMessage->SetText(infoObject->mScreenMessage);
 
+    /* this stops navigation rules so the background widgets won't have active navigation.
+     * to make also the mouse not interact with widgets behind the confirm screen, in the widget itself,
+     * you need to make the overlay in the widget as visible, to consume mouse input */
+    if (const UWidget* rootWidget = GetRootWidget()) {
+        const FName rootName = rootWidget->GetFName();
+        SetAllNavigationRules(EUINavigationRule::Stop, rootName);
+    }
+    
     // checking if contains old buttons created previously
     if (mButtons->GetNumEntries() != 0) {
         auto resetButtonWidgetCallback = [](UMKUI_CommonButtonBase& existingButton) {

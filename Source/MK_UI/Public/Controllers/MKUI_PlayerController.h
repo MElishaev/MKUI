@@ -16,5 +16,6 @@ class MK_UI_API AMKUI_PlayerController : public APlayerController
 
 protected:
 
+    virtual void SetupInputComponent() override;
     virtual void OnPossess(APawn* InPawn) override;
 };
