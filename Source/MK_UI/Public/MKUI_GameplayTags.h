@@ -20,7 +20,8 @@ namespace MKUI_GameplayTags
     MK_UI_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MKUI_widget_storyScreen);
     MK_UI_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MKUI_widget_optionsScreen);
     MK_UI_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MKUI_widget_keyRemapScreen);
+    MK_UI_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MKUI_widget_creditsScreen);
 
     // Options image
     MK_UI_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MKUI_image_testImage);
-}
+} // namespace MKUI_GameplayTags

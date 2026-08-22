@@ -2,6 +2,38 @@
 
 MK_UI provides a Common UI primary layout, tagged widget stacks, async widget loading, and shared activatable-widget base classes. Game-specific plugins may supply their own widget classes and assets while using MK_UI to place them on screen.
 
+## Repository and Host-Project Model
+
+MK_UI is developed as its own repository, but it must be loaded by an Unreal project to build and run. Keep a small C++ host project as the clean integration and smoke-test environment. A game project and the host project should pin a known MK_UI commit instead of silently sharing an unversioned copy.
+
+The recommended layout inside a consuming project is:
+
+```text
+ProjectRoot/
+|-- ProjectName.uproject
+|-- Config/
+|-- Content/
+|-- Source/
+`-- Plugins/
+    `-- MK_UI/
+        |-- MK_UI.uplugin
+        |-- Content/
+        `-- Source/
+```
+
+A Git submodule at `Plugins/MK_UI` is the preferred internal-project integration. The consuming repository records the tested plugin commit while plugin development remains in the MK_UI repository.
+
+## Installing MK_UI in a New Project
+
+1. Use a C++ project built with the same Unreal Engine version supported by the plugin.
+2. Clone or add the MK_UI repository at `ProjectRoot/Plugins/MK_UI`. Do not copy `Binaries/` or `Intermediate/` from another project.
+3. Open the project and enable the **MK_UI** plugin. Its descriptor also enables its engine-plugin dependencies.
+4. Restart the editor when requested, regenerate project files if necessary, and perform a clean Development Editor build.
+5. Enable **Show Plugin Content** in the Content Browser when assigning MK_UI assets in Project Settings.
+6. Commit the consuming project's MKUI-related `Config` changes and, when using a submodule, the selected MK_UI commit.
+
+When updating MK_UI, first test the new commit in the host project. Then advance the consuming game's pinned commit and repeat the game-specific build, Blueprint-load, PIE, and packaging checks.
+
 ## Runtime Structure
 
 The runtime flow is:
@@ -32,13 +64,47 @@ These settings belong to the consuming project and should be checked again after
    - Add the keyboard/mouse and gamepad controller-data assets.
    - Set **Default Gamepad Name** to `Generic`.
 7. Under **UI Settings**, assign the generic input mapping context and map widget tags to their soft Widget Blueprint classes.
-8. Under **MKUI Loading Screen Settings**, assign the loading-screen Widget Blueprint if the loading system is used.
-9. Ensure the game's Player Controller creates the primary layout and that the layout registers itself with `UMKUI_Subsystem`.
-10. Ensure every Common UI stack in the primary layout calls `registerWidgetStack` with its corresponding stack tag.
+8. If using the volume options, assign the consuming project's Master, Music, and SFX Sound Classes and its default Sound Mix under **UI Settings > Audio**.
+9. Under **MKUI Loading Screen Settings**, assign the loading-screen Widget Blueprint if the loading system is used.
+10. Ensure the game's Player Controller creates the primary layout and that the layout registers itself with `UMKUI_Subsystem`.
+11. Ensure every Common UI stack in the primary layout calls `registerWidgetStack` with its corresponding stack tag.
 
 Project gameplay tags and project settings are not automatically portable just because they refer to plugin content. Prefer native gameplay tags for reusable plugin-owned tags. If a tag is declared in project configuration, copy that configuration when integrating the plugin elsewhere.
 
+The authoritative consumer configuration belongs in the project's `Config/DefaultEngine.ini`, `Config/DefaultGame.ini`, and `Config/DefaultInput.ini`. Plugin configuration does not replace this project configuration. Copy only reusable MKUI settings; do not copy widget mappings, maps, gameplay tags, or asset paths owned by another game.
+
 The supplied MK_UI Player Controller currently searches for a camera tagged `default` when possessing a pawn. Maps using that behavior need an appropriately tagged camera.
+
+## Audio Options Integration
+
+MK_UI owns the volume-option behavior and stores configurable soft references to the audio routing assets. The consuming project owns the actual audio content and routing hierarchy.
+
+For a minimal setup, the consuming project should provide:
+
+1. A Master Sound Class.
+2. Music and SFX Sound Classes routed beneath the Master class.
+3. A Sound Mix used by `MKUI_GameUserSettings` to apply class overrides.
+4. Music and SFX test sounds routed to their respective classes.
+5. The four corresponding references under **UI Settings > Audio**.
+
+The MKUI host project should keep a small looping music sample and a clearly distinguishable SFX sample. This verifies that the Master, Music, and SFX sliders affect the intended channels independently. These samples are test-project content, not runtime MK_UI dependencies.
+
+Any game may replace the host project's Sound Classes, Sound Mix, and sounds without modifying MK_UI code.
+
+## Integration Verification
+
+Before accepting an MK_UI version in a consuming project:
+
+1. Build after removing stale plugin `Binaries/` and `Intermediate/` artifacts.
+2. Open the editor and check the log for missing modules, classes, gameplay tags, and asset packages.
+3. Use Reference Viewer on plugin maps and primary widgets to confirm they do not depend on content from an unrelated game plugin.
+4. Verify that the primary layout registers all expected stacks.
+5. Push and dismiss an activatable widget on every configured stack.
+6. Switch between keyboard/mouse and gamepad input.
+7. Change, apply, cancel, save, and reload options, including the three volume channels.
+8. Exercise key remapping when the consuming project enables it.
+9. Travel between maps and verify the loading screen when that subsystem is enabled.
+10. Cook and launch a Development package; a successful Editor session alone is not sufficient integration coverage.
 
 ## Adding an Activatable Widget
 
