@@ -3,7 +3,7 @@
 
 #include "AsyncActions/MKUI_AsyncAction_PushConfirmScreen.h"
 #include "Engine/Engine.h"
-#include "Subsystems/MKUI_Subsystem.h"
+#include "Subsystems/MKUI_LocalPlayerSubsystem.h"
 
 UMKUI_AsyncAction_PushConfirmScreen* UMKUI_AsyncAction_PushConfirmScreen::pushConfirmScreen(const UObject* wco,
                                                                                             EConfirmScreenType screenType,
@@ -13,7 +13,7 @@ UMKUI_AsyncAction_PushConfirmScreen* UMKUI_AsyncAction_PushConfirmScreen::pushCo
     if (GEngine) {
         if (auto world = GEngine->GetWorldFromContextObject(wco, EGetWorldErrorMode::LogAndReturnNull)) {
             auto createdAction = NewObject<UMKUI_AsyncAction_PushConfirmScreen>();
-            createdAction->mCachedOwningWorld = world;
+            createdAction->mCachedUISubsystem = UMKUI_LocalPlayerSubsystem::getInstance(wco);
             createdAction->mCachedScreenMsg = screenMsg;
             createdAction->mCachedScreenTitle = screenTitle;
             createdAction->mCachedScreenType = screenType;
@@ -28,12 +28,18 @@ UMKUI_AsyncAction_PushConfirmScreen* UMKUI_AsyncAction_PushConfirmScreen::pushCo
 
 void UMKUI_AsyncAction_PushConfirmScreen::Activate()
 {
-    UMKUI_Subsystem::getInstance(mCachedOwningWorld.Get())->pushConfirmScreenToModalStackAsync(
-        mCachedScreenType,
-        mCachedScreenTitle,
-        mCachedScreenMsg,
-        [this](EConfirmScreenButtonType clickedButtonType) {
-            onButtonClicked.Broadcast(clickedButtonType);
-            SetReadyToDestroy();
-        });
+    if (UMKUI_LocalPlayerSubsystem* uiSubsystem = mCachedUISubsystem.Get()) {
+        uiSubsystem->pushConfirmScreenToModalStackAsync(
+            mCachedScreenType,
+            mCachedScreenTitle,
+            mCachedScreenMsg,
+            [this](EConfirmScreenButtonType clickedButtonType) {
+                onButtonClicked.Broadcast(clickedButtonType);
+                SetReadyToDestroy();
+            });
+    }
+    else {
+        UE_LOG(LogTemp, Error, TEXT("MK_UI could not resolve the owning local player's UI subsystem."));
+        SetReadyToDestroy();
+    }
 }

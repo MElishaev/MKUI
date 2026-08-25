@@ -6,7 +6,7 @@
 #include "ICommonInputModule.h"
 #include "Input/CommonUIInputTypes.h"
 #include "Settings/MKUI_GameUserSettings.h"
-#include "Subsystems/MKUI_Subsystem.h"
+#include "Subsystems/MKUI_LocalPlayerSubsystem.h"
 #include "Widgets/Components/MKUI_CommonButtonBase.h"
 #include "Widgets/Components/MKUI_CommonListView.h"
 #include "Widgets/Components/MKUI_TabListWidgetBase.h"
@@ -111,7 +111,7 @@ void UMKUI_W_OptionsScreen::onResetBoundActionTriggered()
     auto currentSelectedTabButton = mOptionsTabList->GetTabButtonBaseByID(mOptionsTabList->GetActiveTab());
     auto tabName = CastChecked<UMKUI_CommonButtonBase>(currentSelectedTabButton)->getButtonText().ToString();
 
-    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+    UMKUI_LocalPlayerSubsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
         EConfirmScreenType::YesNo,
         FText::FromString(TEXT("Reset settings to default")),
         FText::FromString(TEXT("Are you sure you want to reset the") + tabName + TEXT(" to default?")),

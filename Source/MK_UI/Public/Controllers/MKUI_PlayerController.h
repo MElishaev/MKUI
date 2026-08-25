@@ -12,10 +12,8 @@
 UCLASS()
 class MK_UI_API AMKUI_PlayerController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 protected:
-
-    virtual void SetupInputComponent() override;
-    virtual void OnPossess(APawn* InPawn) override;
+    virtual void OnPossess(APawn* inPawn) override;
 };

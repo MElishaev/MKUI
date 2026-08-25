@@ -28,7 +28,9 @@ class MK_UI_API UMKUI_AsyncAction_PushSoftWidget : public UBlueprintAsyncActionB
 
 public:
     // factory function for creating the async action instance and returning it
-    UFUNCTION(BlueprintCallable, meta=(WorldContext="wco", HidePin="wco", BlueprintInternalUseOnly="true", DisplayName="Push Soft Widget to Stack"))
+    UFUNCTION(BlueprintCallable,
+              Category = "MKUI",
+              meta=(WorldContext="wco", HidePin="wco", BlueprintInternalUseOnly="true", DisplayName="Push Soft Widget to Stack"))
     static UMKUI_AsyncAction_PushSoftWidget* pushSoftWidget(const UObject* wco,
                                                             APlayerController* owningPlayerController,
                                                             TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
@@ -42,10 +44,10 @@ public:
     /**
      * Multicast delegates that act as output pins of the created BP node
      */
-    UPROPERTY(BlueprintAssignable)
+    UPROPERTY(BlueprintAssignable, Category = "MKUI")
     FOnPushSoftWidgetDelegate onWidgetCreatedBeforePush;
 
-    UPROPERTY(BlueprintAssignable)
+    UPROPERTY(BlueprintAssignable, Category = "MKUI")
     FOnPushSoftWidgetDelegate afterPush;
 
 private:

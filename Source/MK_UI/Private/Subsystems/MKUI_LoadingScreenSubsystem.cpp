@@ -1,288 +1,368 @@
-﻿// MAAKU Studio all rights reserved
-
+// MAAKU Studio all rights reserved
 
 #include "Subsystems/MKUI_LoadingScreenSubsystem.h"
-#include "PreLoadScreenManager.h"
+
 #include "Blueprint/UserWidget.h"
-#include "Interfaces/MKUI_LoadingScreenObserver.h"
-#include "Settings/MKUI_LoadingScreenSettings.h"
 #include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "HAL/PlatformTime.h"
+#include "Interfaces/MKUI_LoadingScreenObserver.h"
+#include "Misc/PackageName.h"
+#include "PreLoadScreenManager.h"
+#include "Settings/MKUI_LoadingScreenSettings.h"
+#include "Subsystems/MKUI_LoadingTask.h"
+#include "UObject/UObjectHash.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#endif
 
-void UMKUI_LoadingScreenSubsystem::notifyStageComplete(const FName stageName)
+UMKUI_LoadingTask* UMKUI_LoadingScreenSubsystem::beginLoadingTask(const FText& loadingReason)
 {
-    if (mStagesState.Contains(stageName)) {
-        mStagesState.Add(stageName, true);
+    if (!ensureAlwaysMsgf(IsInGameThread(), TEXT("MK_UI loading tasks must begin on the game thread."))) {
+        return nullptr;
     }
-    else {
-        UE_LOG(LogTemp, Error, TEXT("System readiness doesn't contain %s for level %s"), *stageName.ToString(), *mCurrentLoadingLevelName);
-    }
+
+    const FText resolvedReason = loadingReason.IsEmpty() ? FText::FromString(TEXT("Loading")) : loadingReason;
+
+    UMKUI_LoadingTask* loadingTask = NewObject<UMKUI_LoadingTask>(this);
+    loadingTask->initialize(this, resolvedReason);
+    mActiveLoadingTasks.Add(loadingTask);
+
+    mHoldLoadingScreenStartupTime = -1.0;
+    SetTickableTickType(ETickableTickType::Conditional);
+    tryUpdateLoadingScreen();
+
+    return loadingTask;
 }
 
-bool UMKUI_LoadingScreenSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+int32 UMKUI_LoadingScreenSubsystem::getActiveLoadingTaskCount() const { return mActiveLoadingTasks.Num(); }
+
+bool UMKUI_LoadingScreenSubsystem::ShouldCreateSubsystem(UObject* outer) const
 {
-    if (!CastChecked<UGameInstance>(Outer)->IsDedicatedServerInstance()) {
-        // return true to create the subsystem only in case there are no instantiated classes already
-        TArray<UClass*> classes;
-        GetDerivedClasses(GetClass(), classes);
-        return classes.IsEmpty();
+    const UGameInstance* gameInstance = CastChecked<UGameInstance>(outer);
+    const UMKUI_LoadingScreenSettings* settings = GetDefault<UMKUI_LoadingScreenSettings>();
+
+    if (!Super::ShouldCreateSubsystem(outer) || gameInstance->IsDedicatedServerInstance() || !settings ||
+        !settings->mbEnableLoadingScreen) {
+        return false;
     }
-    return false;
+
+    if (settings->mSoftLoadingScreenWidgetClass.IsNull()) {
+        UE_LOG(LogTemp, Error, TEXT("MK_UI loading screens are enabled, but no loading-screen widget is configured."));
+        return false;
+    }
+
+    // Prefer an explicitly derived subsystem over this base implementation.
+    TArray<UClass*> derivedClasses;
+    GetDerivedClasses(GetClass(), derivedClasses, false);
+    return derivedClasses.IsEmpty();
 }
 
-void UMKUI_LoadingScreenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UMKUI_LoadingScreenSubsystem::Initialize(FSubsystemCollectionBase& collection)
 {
+    Super::Initialize(collection);
+
     FCoreUObjectDelegates::PreLoadMapWithContext.AddUObject(this, &ThisClass::handleMapPreloaded);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::handleMapPostLoaded);
-
-    const auto loadingScreenSettings = GetDefault<UMKUI_LoadingScreenSettings>();
-    check(loadingScreenSettings);
-
-    mCachedLoadingConditionsDT = loadingScreenSettings->getLoadingConditionsDataTable();
 }
 
 void UMKUI_LoadingScreenSubsystem::Deinitialize()
 {
     FCoreUObjectDelegates::PreLoadMapWithContext.RemoveAll(this);
     FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+
+    for (UMKUI_LoadingTask* loadingTask : mActiveLoadingTasks) {
+        if (loadingTask) {
+            loadingTask->invalidate();
+        }
+    }
+    mActiveLoadingTasks.Reset();
+
+    tryRemoveLoadingScreen();
+    setWorldRenderingDisabled(false);
+
+    Super::Deinitialize();
 }
 
 UWorld* UMKUI_LoadingScreenSubsystem::GetTickableGameObjectWorld() const
 {
-    if (const auto gi = GetGameInstance()) {
-        return gi->GetWorld();
+    if (const UGameInstance* gameInstance = GetGameInstance()) {
+        return gameInstance->GetWorld();
     }
+
     return nullptr;
 }
 
-void UMKUI_LoadingScreenSubsystem::Tick(float DeltaTime)
-{
-    tryUpdateLoadingScreen();
-}
+void UMKUI_LoadingScreenSubsystem::Tick(float) { tryUpdateLoadingScreen(); }
 
 ETickableTickType UMKUI_LoadingScreenSubsystem::GetTickableTickType() const
 {
-    if (IsTemplate()) {
-        return ETickableTickType::Never;
-    }
-    return ETickableTickType::Conditional; // returning conditional will mark flag to call IsTickable() to determine if tick is needed
+    return IsTemplate() ? ETickableTickType::Never : ETickableTickType::Conditional;
 }
 
-bool UMKUI_LoadingScreenSubsystem::IsTickable() const
-{
-    // todo - why game viewport client is the condition for determining if should tick? 
-    return GetGameInstance() && GetGameInstance()->GetGameViewportClient();
-}
+bool UMKUI_LoadingScreenSubsystem::IsTickable() const { return GetGameInstance() && GetGameInstance()->GetGameViewportClient(); }
 
 TStatId UMKUI_LoadingScreenSubsystem::GetStatId() const
 {
     RETURN_QUICK_DECLARE_CYCLE_STAT(UMKUI_LoadingScreenSubsystem, STATGROUP_Tickables);
 }
 
-void UMKUI_LoadingScreenSubsystem::handleMapPreloaded(const FWorldContext& wc, const FString& mapName)
+void UMKUI_LoadingScreenSubsystem::completeLoadingTask(UMKUI_LoadingTask* loadingTask)
 {
-    SetTickableTickType(ETickableTickType::Conditional);
-    UE_LOG(LogTemp, Warning, TEXT("Loading %s"), *mapName);
-
-    // extract name from mapName which is a relative path to the level file in the project
-    FString strippedName = mapName;
-    if (const int32 nameStartPosition = mapName.Find("/", ESearchCase::IgnoreCase, ESearchDir::FromEnd); nameStartPosition > 0) {
-        strippedName = mapName.RightChop(nameStartPosition + 1);
-        UE_LOG(LogTemp, Warning, TEXT("Stripped level name %s"), *strippedName);
+    if (!loadingTask || mActiveLoadingTasks.RemoveSingleSwap(loadingTask) == 0) {
+        return;
     }
-    
-    // based on mapName, prepare data for checking loading conditions
-    mStagesState.Empty();
-    if (mCachedLoadingConditionsDT) {
-        if (const auto levelLoadingConditions = mCachedLoadingConditionsDT->FindRow<FLoadingCondition>(FName(strippedName), "")) {
-            for (const FName sysName : levelLoadingConditions->mRequiredSystems) {
-                mStagesState.Add(sysName, false);
-            }
-        }
-        else {
-            UE_LOG(LogTemp, Error, TEXT("Didn't find row for %s"), *strippedName);
-        }
-    }   
-    
+
+    loadingTask->invalidate();
+    SetTickableTickType(ETickableTickType::Conditional);
+    tryUpdateLoadingScreen();
+}
+
+void UMKUI_LoadingScreenSubsystem::handleMapPreloaded(const FWorldContext&, const FString& mapName)
+{
+    mCurrentLoadingLevelName = FPackageName::GetShortName(mapName);
     mbCurrentlyLoadingLevel = true;
-    mCurrentLoadingLevelName = strippedName;
+    mHoldLoadingScreenStartupTime = -1.0;
+
+    UE_LOG(LogTemp, Log, TEXT("MK_UI is loading map %s."), *mCurrentLoadingLevelName);
+
+    SetTickableTickType(ETickableTickType::Conditional);
     tryUpdateLoadingScreen();
 }
 
 void UMKUI_LoadingScreenSubsystem::handleMapPostLoaded(UWorld* loadedWorld)
 {
-    // if this condition is true it means the loading is complete - why?
-    if (loadedWorld && loadedWorld->GetGameInstance() == GetGameInstance()) {
-        mbCurrentlyLoadingLevel = false;
-        UE_LOG(LogTemp, Warning, TEXT("Finished loading %s"), *mCurrentLoadingLevelName);
+    if (!loadedWorld || loadedWorld->GetGameInstance() != GetGameInstance()) {
+        return;
     }
+
+    mbCurrentlyLoadingLevel = false;
+    UE_LOG(LogTemp, Log, TEXT("MK_UI finished loading map %s."), *mCurrentLoadingLevelName);
+
+    SetTickableTickType(ETickableTickType::Conditional);
 }
 
 void UMKUI_LoadingScreenSubsystem::tryUpdateLoadingScreen()
 {
     if (isPreloadScreenActive()) {
-        // early return if not even started loading game yet and still showing startup and splash screens
         return;
     }
+
+    logOverdueLoadingTasks();
 
     if (shouldShowLoadingScreen()) {
-        tryDisplayLoadingScreenIfNone();
-        mOnLoadingReasonUpdated.Broadcast(mLoadingReason);
-    }
-    else {
-        tryRemoveLoadingScreen();
-        notifyLoadingScreenVisibilityChanged(false);
-        mHoldLoadingScreenStartupTime = -1.f;
-        mCurrentLoadingLevelName.Reset();
-        SetTickableTickType(ETickableTickType::Never);
-    }
-}
-
-void UMKUI_LoadingScreenSubsystem::tryDisplayLoadingScreenIfNone()
-{
-    if (mCachedCreatedLoadingScreenWidget) {
+        const bool bLoadingScreenVisible = tryDisplayLoadingScreenIfNone();
+        setWorldRenderingDisabled(bLoadingScreenVisible && mbShouldDisableWorldRendering);
+        broadcastLoadingReasonIfChanged();
         return;
     }
 
-    const auto loadingScreenSettings = GetDefault<UMKUI_LoadingScreenSettings>();
+    tryRemoveLoadingScreen();
+    setWorldRenderingDisabled(false);
+    mHoldLoadingScreenStartupTime = -1.0;
+    mCurrentLoadingLevelName.Reset();
+    SetTickableTickType(ETickableTickType::Never);
+}
 
-    // will crash if widget wasn't set in the project settings
-    const auto loadedWidgetClass = loadingScreenSettings->getLoadingScreenWidgetClassChecked();
-    if (auto gi = GetGameInstance()) {
-        const auto widgetInst = UUserWidget::CreateWidgetInstance(*gi, loadedWidgetClass, NAME_None);
-        check(widgetInst);
-
-        mCachedCreatedLoadingScreenWidget = widgetInst->TakeWidget();
-        gi->GetGameViewportClient()->AddViewportWidgetContent(mCachedCreatedLoadingScreenWidget.ToSharedRef(), 9999);
-        notifyLoadingScreenVisibilityChanged(true);
+bool UMKUI_LoadingScreenSubsystem::tryDisplayLoadingScreenIfNone()
+{
+    if (mCachedCreatedLoadingScreenWidget) {
+        return true;
     }
+
+    UGameInstance* gameInstance = GetGameInstance();
+    UGameViewportClient* viewportClient = gameInstance ? gameInstance->GetGameViewportClient() : nullptr;
+    const UMKUI_LoadingScreenSettings* settings = GetDefault<UMKUI_LoadingScreenSettings>();
+    const TSubclassOf<UUserWidget> widgetClass = settings ? settings->getLoadingScreenWidgetClass() : nullptr;
+
+    if (!gameInstance || !viewportClient || !widgetClass) {
+        if (!mbWidgetLoadFailureLogged) {
+            UE_LOG(LogTemp, Error, TEXT("MK_UI could not create the configured loading-screen widget."));
+            mbWidgetLoadFailureLogged = true;
+        }
+        return false;
+    }
+
+    UUserWidget* widgetInstance = UUserWidget::CreateWidgetInstance(*gameInstance, widgetClass, NAME_None);
+    if (!widgetInstance) {
+        if (!mbWidgetLoadFailureLogged) {
+            UE_LOG(LogTemp, Error, TEXT("MK_UI could not instantiate the configured loading-screen widget."));
+            mbWidgetLoadFailureLogged = true;
+        }
+        return false;
+    }
+
+    mCachedCreatedLoadingScreenWidget = widgetInstance->TakeWidget();
+    viewportClient->AddViewportWidgetContent(mCachedCreatedLoadingScreenWidget.ToSharedRef(), 9999);
+    notifyLoadingScreenVisibilityChanged(true);
+    return true;
 }
 
 void UMKUI_LoadingScreenSubsystem::tryRemoveLoadingScreen()
 {
-    if (mCachedCreatedLoadingScreenWidget) {
-        GetGameInstance()->GetGameViewportClient()->RemoveViewportWidgetContent(mCachedCreatedLoadingScreenWidget.ToSharedRef());
-        mCachedCreatedLoadingScreenWidget.Reset();
+    if (!mCachedCreatedLoadingScreenWidget) {
+        return;
     }
+
+    if (UGameInstance* gameInstance = GetGameInstance()) {
+        if (UGameViewportClient* viewportClient = gameInstance->GetGameViewportClient()) {
+            viewportClient->RemoveViewportWidgetContent(mCachedCreatedLoadingScreenWidget.ToSharedRef());
+        }
+    }
+
+    mCachedCreatedLoadingScreenWidget.Reset();
+    notifyLoadingScreenVisibilityChanged(false);
 }
 
 bool UMKUI_LoadingScreenSubsystem::isPreloadScreenActive() const
 {
-    if (const auto preloadScreenManager = FPreLoadScreenManager::Get()) {
-        return preloadScreenManager->HasValidActivePreLoadScreen();
-    }
-    return false;
+    const FPreLoadScreenManager* preloadScreenManager = FPreLoadScreenManager::Get();
+    return preloadScreenManager && preloadScreenManager->HasValidActivePreLoadScreen();
 }
 
 bool UMKUI_LoadingScreenSubsystem::shouldShowLoadingScreen()
 {
-    const auto loadingScreenSettings = GetDefault<UMKUI_LoadingScreenSettings>();
+    const UMKUI_LoadingScreenSettings* settings = GetDefault<UMKUI_LoadingScreenSettings>();
+    mbShouldDisableWorldRendering = false;
+
 #if WITH_EDITOR
-    if (GEditor && !loadingScreenSettings->mbShowLoadingScreenInEditor) {
+    if (GEditor && settings && !settings->mbShowLoadingScreenInEditor) {
         return false;
     }
 #endif
-    // check if the objects in the world need loading screen - but only if we still loading the level.
-    // there may be a case we finished loading but we still hold the loading screen to prevent displaying
-    // not yet streamed in textures
-    if (!checkLoadingConditionsMet()) {
-        GetGameInstance()->GetGameViewportClient()->bDisableWorldRendering = true;
+
+    if (!areLoadingRequirementsMet()) {
+        mbShouldDisableWorldRendering = true;
         return true;
     }
 
-    mLoadingReason = TEXT("Waiting for streaming textures");
-
-    // at this point, we found that there is no need to show loading screen, allow world to render to our viewport
-    GetGameInstance()->GetGameViewportClient()->bDisableWorldRendering = false;
-    
-    return shouldHoldLoadingScreen(loadingScreenSettings->mSecsToHoldLoadingScreenAfterLoad);
+    mLoadingReason = FText::FromString(TEXT("Waiting for streaming to settle"));
+    return settings && shouldHoldLoadingScreen(settings->mSecsToHoldLoadingScreenAfterLoad);
 }
 
-bool UMKUI_LoadingScreenSubsystem::checkLoadingConditionsMet()
+bool UMKUI_LoadingScreenSubsystem::areLoadingRequirementsMet()
 {
     if (mbCurrentlyLoadingLevel) {
-        mLoadingReason = TEXT("Loading Level");
+        mLoadingReason = FText::FromString(TEXT("Loading level"));
         return false;
     }
 
-    UWorld* owningWorld = GetGameInstance()->GetWorld();
+    UWorld* owningWorld = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr;
     if (!owningWorld) {
-        mLoadingReason = TEXT("Loading World");
-        return false;        
+        mLoadingReason = FText::FromString(TEXT("Loading world"));
+        return false;
     }
 
     if (!owningWorld->HasBegunPlay()) {
-        mLoadingReason = FString::Printf(TEXT("World %s hasn't begun play yet"), *owningWorld->GetFName().ToString());
+        mLoadingReason = FText::Format(FText::FromString(TEXT("Starting world {0}")), FText::FromName(owningWorld->GetFName()));
         return false;
     }
 
-    // TODO: we can check here additional conditions that must be met for loading to complete
-
-    if (mCachedLoadingConditionsDT) {
-        if (auto loadingConditions = mCachedLoadingConditionsDT->FindRow<FLoadingCondition>(FName(mCurrentLoadingLevelName), "")) {
-            for (const auto sysName : loadingConditions->mRequiredSystems) {
-                const bool bSysReady = mStagesState.FindRef(sysName);
-                if (!bSysReady) {
-                    mLoadingReason = FString::Printf(TEXT("Loading %s"), *sysName.ToString());
-                    return false;
-                }
-            }
-
-            // todo - not implemented checking loaded actors yet
-        }
-        else {
-            UE_LOG(LogTemp, Error, TEXT("Couldn't find loading conditions for level %s"), *mCurrentLoadingLevelName);
-        }
+    if (!mActiveLoadingTasks.IsEmpty()) {
+        const UMKUI_LoadingTask* loadingTask = mActiveLoadingTasks[0];
+        mLoadingReason = loadingTask ? loadingTask->getReason() : FText::FromString(TEXT("Finishing game initialization"));
+        return false;
     }
-    
-    return true;    
+
+    return true;
 }
 
-bool UMKUI_LoadingScreenSubsystem::shouldHoldLoadingScreen(const float secsToHold)
+bool UMKUI_LoadingScreenSubsystem::shouldHoldLoadingScreen(const float secondsToHold)
 {
-    const float currentTime = FPlatformTime::Seconds();
-    if (mHoldLoadingScreenStartupTime < 0) {
-        mHoldLoadingScreenStartupTime = currentTime;
+    if (secondsToHold <= 0.0f) {
+        return false;
     }
-    const float elapsedTime = currentTime - mHoldLoadingScreenStartupTime;
-    if (elapsedTime < secsToHold) {
-        return true;
+
+    const double currentTimeSeconds = FPlatformTime::Seconds();
+    if (mHoldLoadingScreenStartupTime < 0.0) {
+        mHoldLoadingScreenStartupTime = currentTimeSeconds;
     }
-    return false;
+
+    return currentTimeSeconds - mHoldLoadingScreenStartupTime < secondsToHold;
 }
 
-void UMKUI_LoadingScreenSubsystem::notifyLoadingScreenVisibilityChanged(bool bVisible)
+void UMKUI_LoadingScreenSubsystem::broadcastLoadingReasonIfChanged()
 {
-    auto gi = GetGameInstance();
-    for (auto localPlayer : gi->GetLocalPlayers()) {
+    if (mLoadingReason.EqualTo(mLastBroadcastLoadingReason)) {
+        return;
+    }
+
+    mLastBroadcastLoadingReason = mLoadingReason;
+    const FString loadingReason = mLoadingReason.ToString();
+    OnLoadingReasonUpdated.Broadcast(loadingReason);
+}
+
+void UMKUI_LoadingScreenSubsystem::logOverdueLoadingTasks()
+{
+    const UMKUI_LoadingScreenSettings* settings = GetDefault<UMKUI_LoadingScreenSettings>();
+    if (!settings || settings->mLoadingTaskWarningTimeout <= 0.0f) {
+        return;
+    }
+
+    const double currentTimeSeconds = FPlatformTime::Seconds();
+    for (UMKUI_LoadingTask* loadingTask : mActiveLoadingTasks) {
+        if (!loadingTask || !loadingTask->shouldLogTimeoutWarning(currentTimeSeconds, settings->mLoadingTaskWarningTimeout)) {
+            continue;
+        }
+
+        UE_LOG(LogTemp,
+               Warning,
+               TEXT("MK_UI loading task '%s' has remained active for at least %.1f seconds."),
+               *loadingTask->getReason().ToString(),
+               settings->mLoadingTaskWarningTimeout);
+        loadingTask->markTimeoutWarningLogged();
+    }
+}
+
+void UMKUI_LoadingScreenSubsystem::setWorldRenderingDisabled(const bool bDisabled) const
+{
+    if (const UGameInstance* gameInstance = GetGameInstance()) {
+        if (UGameViewportClient* viewportClient = gameInstance->GetGameViewportClient()) {
+            viewportClient->bDisableWorldRendering = bDisabled;
+        }
+    }
+}
+
+void UMKUI_LoadingScreenSubsystem::notifyLoadingScreenVisibilityChanged(const bool bVisible)
+{
+    UGameInstance* gameInstance = GetGameInstance();
+    if (!gameInstance) {
+        return;
+    }
+
+    for (ULocalPlayer* localPlayer : gameInstance->GetLocalPlayers()) {
         if (!localPlayer) {
             continue;
         }
 
-        if (auto pc = localPlayer->GetPlayerController(gi->GetWorld())) {
-            if (pc->Implements<UMKUI_LoadingScreenObserver>()) {
-                if (bVisible) {
-                    IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenActivated(pc);
-                }
-                else {
-                    IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenDeactivated(pc);
-                }
-            }
+        APlayerController* playerController = localPlayer->GetPlayerController(gameInstance->GetWorld());
+        if (!playerController) {
+            continue;
+        }
 
-            if (auto pawn = pc->GetPawn()) {
-                if (pawn->Implements<UMKUI_LoadingScreenObserver>()) {
-                    if (bVisible) {
-                        IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenActivated(pawn);
-                    }
-                    else {
-                        IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenDeactivated(pawn);
-                    }
-                }
+        if (playerController->Implements<UMKUI_LoadingScreenObserver>()) {
+            if (bVisible) {
+                IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenActivated(playerController);
+            }
+            else {
+                IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenDeactivated(playerController);
             }
         }
-    }
 
-    // todo - for notifying other objects that needs to know - this happens here
+        APawn* pawn = playerController->GetPawn();
+        if (!pawn || !pawn->Implements<UMKUI_LoadingScreenObserver>()) {
+            continue;
+        }
+
+        if (bVisible) {
+            IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenActivated(pawn);
+        }
+        else {
+            IMKUI_LoadingScreenObserver::Execute_handleLoadingScreenDeactivated(pawn);
+        }
+    }
 }

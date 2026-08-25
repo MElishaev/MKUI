@@ -3,15 +3,9 @@
 #include "Subsystems/MKUI_Subsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "MKUI_FunctionLibrary.h"
-#include "MKUI_GameplayTags.h"
-#include "Engine/AssetManager.h"
-#include "Widgets/CommonActivatableWidgetContainer.h"
-#include "Widgets/MKUI_W_ActivatableBase.h"
-#include "Widgets/MKUI_W_PrimaryLayout.h"
-#include "MKUITypes/MKUIEnumTypes.h"
-#include "Widgets/MKUI_W_ConfirmScreen.h"
 #include "Framework/Application/NavigationConfig.h"
+#include "Subsystems/MKUI_LocalPlayerSubsystem.h"
+#include "Widgets/MKUI_W_PrimaryLayout.h"
 
 
 UMKUI_Subsystem* UMKUI_Subsystem::getInstance(const UObject* worldContextObject)
@@ -23,9 +17,9 @@ UMKUI_Subsystem* UMKUI_Subsystem::getInstance(const UObject* worldContextObject)
     return nullptr;
 }
 
-bool UMKUI_Subsystem::ShouldCreateSubsystem(UObject* Outer) const
+bool UMKUI_Subsystem::ShouldCreateSubsystem(UObject* outer) const
 {
-    if (!CastChecked<UGameInstance>(Outer)->IsDedicatedServerInstance()) {
+    if (!CastChecked<UGameInstance>(outer)->IsDedicatedServerInstance()) {
         // return true to create the subsystem only in case there are no instantiated classes already
         TArray<UClass*> classes;
         GetDerivedClasses(GetClass(), classes);
@@ -34,9 +28,9 @@ bool UMKUI_Subsystem::ShouldCreateSubsystem(UObject* Outer) const
     return false;
 }
 
-void UMKUI_Subsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UMKUI_Subsystem::Initialize(FSubsystemCollectionBase& collection)
 {
-    Super::Initialize(Collection);
+    Super::Initialize(collection);
 
     const TSharedRef<FNavigationConfig> navigationConfig = FSlateApplication::Get().GetNavigationConfig();
 
@@ -49,48 +43,25 @@ void UMKUI_Subsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UMKUI_Subsystem::registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget)
 {
-    check(widget);
-    mPrimaryLayout = widget;
+    if (UMKUI_LocalPlayerSubsystem* localPlayerSubsystem = UMKUI_LocalPlayerSubsystem::getInstance(widget)) {
+        localPlayerSubsystem->registerPrimaryLayoutWidget(widget);
+    }
 }
 
 void UMKUI_Subsystem::removeAllWidgetsFromStack(UPARAM(meta=(Categories="MKUI.widgetStack")) const FGameplayTag widgetStackTag)
 {
-    if (!mPrimaryLayout) {
-        UE_LOG(LogTemp, Error, TEXT("Primary layout wasn't set yet"));
-        return;
+    if (UMKUI_LocalPlayerSubsystem* localPlayerSubsystem = UMKUI_LocalPlayerSubsystem::getInstance(GetGameInstance())) {
+        localPlayerSubsystem->removeAllWidgetsFromStack(widgetStackTag);
     }
-
-    auto widgetStack = mPrimaryLayout->findWidgetStackByTag(widgetStackTag);
-    widgetStack->ClearWidgets();
 }
 
 void UMKUI_Subsystem::pushSoftWidgetToStackAsync(const FGameplayTag& widgetStackTag,
                                                  TSoftClassPtr<UMKUI_W_ActivatableBase> widgetClass,
                                                  TFunction<void(EAsyncPushWidgetState, UMKUI_W_ActivatableBase*)> asyncPushStateCallback)
 {
-    check(!widgetClass.IsNull());
-
-    UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-        widgetClass.ToSoftObjectPath(),
-        // called when loading is finished - there is no real difference between passing c++ lambda immediately apart from that if we pass
-        // c++ lambda, there is an implicit conversion, which UE supports, of the lambda to FStreamableDelegate.
-        // But overall, this method expects the UE FStreamableDelegate as a lambda.
-        FStreamableDelegate::CreateLambda(
-            [this, widgetClass, widgetStackTag, asyncPushStateCallback]() {
-                const auto loadedWidget = widgetClass.Get();
-                check(loadedWidget && mPrimaryLayout);
-
-                const auto widgetStack = mPrimaryLayout->findWidgetStackByTag(widgetStackTag);
-                // creating callback to pass because this is not yet the place where we call the "before push" callback
-                auto widgetInitFunc = [&](UMKUI_W_ActivatableBase& createdWidgetInstance) {
-                    asyncPushStateCallback(EAsyncPushWidgetState::OnCreatedBeforePush, &createdWidgetInstance);
-                };
-                const auto createdWidget = widgetStack->AddWidget<UMKUI_W_ActivatableBase>(loadedWidget, widgetInitFunc);
-
-                asyncPushStateCallback(EAsyncPushWidgetState::AfterPush, createdWidget);
-            }
-            )
-        );
+    if (UMKUI_LocalPlayerSubsystem* localPlayerSubsystem = UMKUI_LocalPlayerSubsystem::getInstance(GetGameInstance())) {
+        localPlayerSubsystem->pushSoftWidgetToStackAsync(widgetStackTag, widgetClass, asyncPushStateCallback);
+    }
 }
 
 void UMKUI_Subsystem::pushConfirmScreenToModalStackAsync(EConfirmScreenType screenType,
@@ -98,33 +69,8 @@ void UMKUI_Subsystem::pushConfirmScreenToModalStackAsync(EConfirmScreenType scre
                                                          const FText& screenMsg,
                                                          TFunction<void(EConfirmScreenButtonType)> buttonClickedCallback)
 {
-    // create screen info for the pushed screen
-    UConfirmScreenInfoObject* screenInfo = nullptr;
-    switch (screenType) {
-        case EConfirmScreenType::Ok:
-            screenInfo = UConfirmScreenInfoObject::createOkScreenInfo(screenTitle, screenMsg);
-            break;
-        case EConfirmScreenType::YesNo:
-            screenInfo = UConfirmScreenInfoObject::createYesNoScreenInfo(screenTitle, screenMsg);
-            break;
-        case EConfirmScreenType::OkCancel:
-            screenInfo = UConfirmScreenInfoObject::createOkCancelScreenInfo(screenTitle, screenMsg);
-            break;
-        case EConfirmScreenType::Unknown:
-            break;
+    if (UMKUI_LocalPlayerSubsystem* localPlayerSubsystem = UMKUI_LocalPlayerSubsystem::getInstance(GetGameInstance())) {
+        localPlayerSubsystem->pushConfirmScreenToModalStackAsync(
+            screenType, screenTitle, screenMsg, buttonClickedCallback);
     }
-    check(screenInfo);
-
-    // create push state callback and push the widget to the UI stack
-    auto buttonPushStateCallback = [screenInfo, buttonClickedCallback](EAsyncPushWidgetState pushState,
-                                                                       UMKUI_W_ActivatableBase* pushedWidget) {
-        if (pushState == EAsyncPushWidgetState::OnCreatedBeforePush) {
-            const auto createConfirmScreen = CastChecked<UMKUI_W_ConfirmScreen>(pushedWidget);
-            createConfirmScreen->initConfirmScreen(screenInfo, buttonClickedCallback);
-        }
-    };
-
-    pushSoftWidgetToStackAsync(MKUI_GameplayTags::MKUI_widgetStack_modal,
-                               UMKUI_FunctionLibrary::getSoftWidgetClassByTag(MKUI_GameplayTags::MKUI_widget_confirmScreen),
-                               buttonPushStateCallback);
 }
