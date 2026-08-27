@@ -206,11 +206,15 @@ forwards to the primary local player. Do not configure automatic layout creation
 while also creating the root in a Player Controller; MK_UI will reject and
 remove the duplicate legacy layout.
 
-The supplied `BP_MKUI_PlayerController` is part of that legacy path and also
-contains game-specific camera behavior. Do not use it as the base controller for
-new integrations. After all consuming projects and plugin Blueprints use
-`UMKUI_LocalPlayerSubsystem`, delete `BP_MKUI_PlayerController`, the compatibility
-facade, and this migration guidance together.
+MK_UI does not supply a GameMode or Player Controller. The consuming project
+must use its own framework classes and decide when to request its first screen.
+Do not add game-specific camera selection, pawn behavior, hardware benchmarking,
+or map startup logic to the reusable plugin.
+
+Keep the `UMKUI_Subsystem` compatibility facade only while an existing consumer
+still registers a controller-created primary layout. After every consumer uses
+the configured local-player-owned layout, remove the facade and this migration
+guidance together.
 
 ## Audio Options Integration
 
