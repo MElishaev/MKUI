@@ -4,7 +4,8 @@
 #include "MKUI_FunctionLibrary.h"
 #include "Settings/MKUI_DeveloperSettings.h"
 
-TSoftClassPtr<UMKUI_W_ActivatableBase> UMKUI_FunctionLibrary::getSoftWidgetClassByTag(UPARAM(meta=(Category="MKUI.widget")) FGameplayTag widgetTag)
+TSoftClassPtr<UMKUI_W_ActivatableBase> UMKUI_FunctionLibrary::getSoftWidgetClassByTag(UPARAM(meta = (Category = "MKUI.widget"))
+                                                                                          FGameplayTag widgetTag)
 {
     const auto devSettings = GetDefault<UMKUI_DeveloperSettings>();
 
@@ -13,9 +14,14 @@ TSoftClassPtr<UMKUI_W_ActivatableBase> UMKUI_FunctionLibrary::getSoftWidgetClass
     return devSettings->mWidgetMap.FindRef(widgetTag);
 }
 
-TSoftObjectPtr<UTexture2D> UMKUI_FunctionLibrary::getOptionsSoftImageByTag(UPARAM(meta=(Categories="MKUI.image")) FGameplayTag imgTag)
+TSoftObjectPtr<UTexture2D> UMKUI_FunctionLibrary::getOptionsSoftImageByTag(UPARAM(meta = (Categories = "MKUI.image")) FGameplayTag imgTag)
 {
-    const auto devSettings = GetDefault<UMKUI_DeveloperSettings>();
-    checkf(devSettings->mOptionsScreenSoftImageMap.Contains(imgTag), TEXT("Couldn't find the corresponding image %s"), *(imgTag.ToString()));
-    return devSettings->mOptionsScreenSoftImageMap.FindRef(imgTag);
+    const UMKUI_DeveloperSettings* devSettings = GetDefault<UMKUI_DeveloperSettings>();
+    const TSoftObjectPtr<UTexture2D>* image = devSettings->mOptionsScreenSoftImageMap.Find(imgTag);
+    if (!image) {
+        UE_LOG(LogTemp, Warning, TEXT("MK_UI could not find an optional Options image mapped to %s."), *imgTag.ToString());
+        return {};
+    }
+
+    return *image;
 }

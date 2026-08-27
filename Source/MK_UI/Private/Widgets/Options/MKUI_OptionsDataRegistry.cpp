@@ -5,29 +5,28 @@
 
 #include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
+#include "Engine/LocalPlayer.h"
+#include "EnhancedActionKeyMapping.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "Internationalization/StringTableRegistry.h"
 #include "MKUI_FunctionLibrary.h"
 #include "MKUI_GameplayTags.h"
+#include "PlayerMappableKeySettings.h"
+#include "Settings/MKUI_DeveloperSettings.h"
 #include "Settings/MKUI_GameUserSettings.h"
-#include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectCollection.h"
+#include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectScalar.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectString.h"
 #include "Widgets/Options/DataObjects/MKUI_ListDataObjectStringResolution.h"
-#include "Internationalization/StringTableRegistry.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedActionKeyMapping.h"
-#include "InputMappingContext.h"
-#include "PlayerMappableKeySettings.h"
-#include "UserSettings/EnhancedInputUserSettings.h"
-#include "Widgets/Options/DataObjects/MKUI_ListDataObjectKeyRemap.h"
-#include "Engine/LocalPlayer.h"
-#include "Runtime/Launch/Resources/Version.h"
+#include "Widgets/Options/MKUI_OptionsDataInteractionHelper.h"
 
 
-#define GET_DESCRIPTION(key) \
-    LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)
+#define GET_DESCRIPTION(key) LOCTABLE("/MK_UI/UI/StringTables/ST_OptionEntriesDetails.ST_OptionEntriesDetails", key)
 
-#define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName) \
+#define MAKE_OPTIONS_DATA_ACCESSORS(accessorFuncName)                                                                                      \
     MakeShared<MKUI_FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UMKUI_GameUserSettings, accessorFuncName))
 
 void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
@@ -40,9 +39,8 @@ void UMKUI_OptionsDataRegistry::init(ULocalPlayer* owningLocalPlayer)
 
 TArray<UMKUI_ListDataObjectBase*> UMKUI_OptionsDataRegistry::getListSourceItemsBySelectedTabId(const FName tabId) const
 {
-    auto tab = mRegisteredTabCollections.FindByPredicate([tabId](const UMKUI_ListDataObjectCollection* v) {
-        return v->getmDataId() == tabId;
-    });
+    auto tab =
+        mRegisteredTabCollections.FindByPredicate([tabId](const UMKUI_ListDataObjectCollection* v) { return v->getmDataId() == tabId; });
 
     checkf(tab, TEXT("No valid tab found with ID %s"), *tabId.ToString());
 
@@ -104,14 +102,17 @@ void UMKUI_OptionsDataRegistry::initGameplayCollectionTab()
         gameplayTabCollection->addChildListData(gameDifficulty);
     }
 
-    // test item for testing functionality when multiple values in the options tab
-    {
+#if !UE_BUILD_SHIPPING
+    const UMKUI_DeveloperSettings* devSettings = GetDefault<UMKUI_DeveloperSettings>();
+    if (devSettings->mbEnableDevelopmentTestOptions) {
+        // Exercise multiple values and optional description images without affecting normal consumers.
         const auto testItem = NewObject<UMKUI_ListDataObjectString>();
         testItem->setmDataId("testItem");
         testItem->setmDataDisplayName(FText::FromString(TEXT("Test Item")));
         testItem->setmSoftDescriptionImage(UMKUI_FunctionLibrary::getOptionsSoftImageByTag(MKUI_GameplayTags::MKUI_image_testImage));
         gameplayTabCollection->addChildListData(testItem);
     }
+#endif
 
     mRegisteredTabCollections.Add(gameplayTabCollection);
 }
@@ -130,7 +131,7 @@ void UMKUI_OptionsDataRegistry::initAudioCollectionTab()
 
         audioTabCollection->addChildListData(volumeCategoryCollection);
 
-        // overall volume 
+        // overall volume
         {
             auto overallVolume = NewObject<UMKUI_ListDataObjectScalar>();
             overallVolume->setmDataId("overallVolume");
@@ -258,7 +259,7 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
         // created edit conditions
         FOptionsDataEditConditionDescriptor packagedOnlyBuildCondition;
         packagedOnlyBuildCondition.setmEditConditionFunc([]() {
-            return !(GIsEditor || GIsPlayInEditorWorld); // returns true only if packaged build  
+            return !(GIsEditor || GIsPlayInEditorWorld); // returns true only if packaged build
         });
         packagedOnlyBuildCondition.setmDisabledRichStringReason(TEXT("<Disabled>This condition is modifyable only in packaged builds</>"));
 
@@ -561,9 +562,8 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
             verticalSync->setmbShouldApplySettingImmediately(true);
 
             FOptionsDataEditConditionDescriptor fullscreenCondition;
-            fullscreenCondition.setmEditConditionFunc([windowMode]() {
-                return windowMode->getCurrentValueAsEnum<EWindowMode::Type>() == EWindowMode::Fullscreen;
-            });
+            fullscreenCondition.setmEditConditionFunc(
+                [windowMode]() { return windowMode->getCurrentValueAsEnum<EWindowMode::Type>() == EWindowMode::Fullscreen; });
             fullscreenCondition.setmDisabledForcedStringValue(TEXT("false"));
             fullscreenCondition.setmDisabledRichStringReason(TEXT("\n<Disabled>This options is only modifyable in Fullscreen mode</>"));
 
@@ -596,24 +596,22 @@ void UMKUI_OptionsDataRegistry::initVideoCollectionTab()
     mRegisteredTabCollections.Add(videoTabCollection);
 }
 
-void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLocalPlayer, const bool bRecreateControlsTab, const bool bFilterForRegisteredIMCs)
+void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLocalPlayer,
+                                                         const bool bRecreateControlsTab,
+                                                         const bool bFilterForRegisteredIMCs)
 {
-    ensureMsgf(ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 6, 
-                    TEXT("%s: Starting with 5.6 use eiUserSettings->GetAllAvailableKeyProfiles()! "
-                         "Else just fails with no mappings returned..."),
-                    *FString::Printf(TEXT(__FUNCTION__)));
-
     // bug: this crashes when input type changes mid key remap screen
     if (bRecreateControlsTab) {
         auto controlsTab = mRegisteredTabCollections.FindByPredicate([](const UMKUI_ListDataObjectCollection* tabCollection) {
             return tabCollection->getmDataId() == FName("controlsTabCollection");
         });
         if (controlsTab) {
-            (*controlsTab)->ConditionalBeginDestroy(); // todo: is this needed? if removing the tab from array it won't be referenced anymore and flagged by UE for GCed
+            (*controlsTab)->ConditionalBeginDestroy(); // todo: is this needed? if removing the tab from array it won't be referenced
+                                                       // anymore and flagged by UE for GCed
             mRegisteredTabCollections.Remove(*controlsTab);
         }
     }
-    
+
     const auto controlsTabCollection = NewObject<UMKUI_ListDataObjectCollection>();
     controlsTabCollection->setmDataId(FName("controlsTabCollection"));
     controlsTabCollection->setmDataDisplayName(FText::FromString(TEXT("Controls")));
@@ -626,16 +624,12 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
     // Get all IDs for CURRENTLY registered IMCs only - the only way I found to filter content from unregistered IMCs
     // which have been previously registered
     TArray<FName> registeredPlayerMappableKeySettingNames;
-    if (bFilterForRegisteredIMCs)
-    {
+    if (bFilterForRegisteredIMCs) {
         const TSet<TObjectPtr<const UInputMappingContext>>& registeredIMCs = eiUserSettings->GetRegisteredInputMappingContexts();
-        for (const UInputMappingContext* registeredIMC : registeredIMCs)
-        {
+        for (const UInputMappingContext* registeredIMC : registeredIMCs) {
             TArray<FEnhancedActionKeyMapping> mappings = registeredIMC->GetMappings();
-            for (FEnhancedActionKeyMapping mapping : mappings)
-            {
-                if (UPlayerMappableKeySettings* keySettings = mapping.GetPlayerMappableKeySettings())
-                {
+            for (FEnhancedActionKeyMapping mapping : mappings) {
+                if (UPlayerMappableKeySettings* keySettings = mapping.GetPlayerMappableKeySettings()) {
                     registeredPlayerMappableKeySettingNames.AddUnique(keySettings->GetMappingName());
                 }
             }
@@ -644,7 +638,7 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
 
     UCommonInputSubsystem* commonInputSubsystem = UCommonInputSubsystem::Get(owningLocalPlayer);
     check(commonInputSubsystem);
-    
+
     ECommonInputType currentInputType = commonInputSubsystem->GetCurrentInputType();
     FPlayerMappableKeyQueryOptions inputTypeFilter;
     inputTypeFilter.KeyToMatch = currentInputType == ECommonInputType::MouseAndKeyboard ? EKeys::S : EKeys::Gamepad_LeftShoulder;
@@ -670,17 +664,16 @@ void UMKUI_OptionsDataRegistry::initControlCollectionTab(ULocalPlayer* owningLoc
                     !mappableKeyProfile->DoesMappingPassQueryOptions(playerKeyMapping, inputTypeFilter) ||
                     (bFilterForRegisteredIMCs && !registeredPlayerMappableKeySettingNames.Contains(playerKeyMapping.GetMappingName()))) {
                     continue;
-                }    
-                
+                }
+
                 auto keyRemapDataObj = NewObject<UMKUI_ListDataObjectKeyRemap>();
                 keyRemapDataObj->setmDataId(playerKeyMapping.GetMappingName());
                 keyRemapDataObj->setmDataDisplayName(playerKeyMapping.GetDisplayName());
                 keyRemapDataObj->initKeyRemapData(eiUserSettings, mappableKeyProfile, currentInputType, playerKeyMapping);
 
                 // setting the display categories for the keys - for example: driving / swimming controls etc.
-                FText displayCategory = playerKeyMapping.GetDisplayCategory().IsEmpty()
-                    ? FText::FromString(TEXT("General"))
-                    : playerKeyMapping.GetDisplayCategory();
+                FText displayCategory = playerKeyMapping.GetDisplayCategory().IsEmpty() ? FText::FromString(TEXT("General"))
+                                                                                        : playerKeyMapping.GetDisplayCategory();
                 FName categoryName(displayCategory.ToString());
                 if (!displayCategoryCollections.Contains(categoryName)) {
                     const auto collection = NewObject<UMKUI_ListDataObjectCollection>();

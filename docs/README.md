@@ -243,6 +243,24 @@ Before accepting an MK_UI version in a consuming project:
 9. Travel between maps and verify the loading screen when that subsystem is enabled.
 10. Cook and launch a Development package; a successful Editor session alone is not sufficient integration coverage.
 
+## Plugin Development Testing
+
+This section is for projects that actively develop or validate MK_UI. It is not
+required when integrating MK_UI as a consumer.
+
+To show the plugin's temporary Options test entry, open **Project Settings >
+Game > UI Settings** in the Editor:
+
+1. Under **Development**, enable **Enable Development Test Options**.
+2. Under **Options**, add `MKUI.image.testImage` to **Options Screen Soft Image
+   Map** and select any texture suitable for validating the description-image
+   presentation.
+
+The entry is excluded from Shipping builds even when the setting remains
+enabled. A missing optional image produces a warning and leaves the image empty;
+it does not prevent the Options screen from opening. MKUIHost enables this test
+entry because it is the clean plugin-development host.
+
 ## Adding an Activatable Widget
 
 ### 1. Create the native base when logic is reusable
@@ -355,4 +373,35 @@ Create a `Content/Movies` directory in the consuming project and add the startup
 
 ## Adding a Key Binding
 
-Document the generic and project-specific key-binding workflow here when it is next exercised and verified.
+MK_UI displays and edits player-mappable bindings owned by the consuming
+project. The plugin does not define the consuming game's gameplay actions or
+decide when their mapping contexts are active.
+
+For normal setup in the Unreal Editor:
+
+1. Under **Project Settings > Engine > Enhanced Input**, enable user settings.
+2. Create the consuming project's Input Actions and Input Mapping Contexts.
+3. For each rebindable Input Action, expand **User Settings**, create its inline
+   **Player Mappable Key Settings**, and assign a unique mapping name, display
+   name, and display category. One settings object per action is sufficient;
+   keyboard and gamepad mappings can inherit it.
+4. In each Input Mapping Context entry, leave **Setting Behavior** as **Inherit
+   Settings from Action** unless that particular mapping needs different
+   metadata.
+5. When activating a gameplay mapping context, add it through the Enhanced Input
+   Local Player Subsystem with **Notify User Settings** enabled. Contexts that
+   are registered only for configuration may instead be passed directly to the
+   Enhanced Input User Settings **Register Input Mapping Context** function.
+
+The Controls screen lists mappings from registered contexts and filters them for
+the player's current input type. Therefore an empty Controls tab normally means
+that no context containing player-mappable entries was registered for that local
+player.
+
+In C++, an active context can be registered while it is added:
+
+```cpp
+FModifyContextOptions options;
+options.bNotifyUserSettings = true;
+inputSubsystem->AddMappingContext(gameplayMappingContext, priority, options);
+```
