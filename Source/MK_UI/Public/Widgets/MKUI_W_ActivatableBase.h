@@ -2,22 +2,23 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CommonActivatableWidget.h"
+#include "CoreMinimal.h"
 #include "MKUI_W_ActivatableBase.generated.h"
 
-class AMKUI_PlayerController;
+class APlayerController;
+
 /**
- * 
+ * Common base for MK_UI screens owned by any consumer-provided Player Controller.
  */
-UCLASS(Abstract, BlueprintType, meta=(DisableNativeTick))
+UCLASS(Abstract, BlueprintType, meta = (DisableNativeTick))
 class MK_UI_API UMKUI_W_ActivatableBase : public UCommonActivatableWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-    UFUNCTION(BlueprintPure, Category="MKUI")
-    AMKUI_PlayerController* getOwningPlayerController();
-    
+    UFUNCTION(BlueprintPure, Category = "MKUI")
+    APlayerController* getOwningPlayerController();
+
 private:
-    TWeakObjectPtr<AMKUI_PlayerController> mCachedOwningPC;
+    TWeakObjectPtr<APlayerController> mCachedOwningPC;
 };

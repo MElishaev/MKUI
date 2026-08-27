@@ -1,41 +1,39 @@
-﻿// MAAKU Studio all rights reserved
+// MAAKU Studio all rights reserved
 
 #pragma once
-
-class UUserWidget;
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
 #include "MKUI_LoadingScreenSettings.generated.h"
 
-/**
- * This class represents the settings for loading screen.
- * This is exposed in the project settings under the "Game" section inside "MKUI Loading Screen Settings"  
- */
-UCLASS(Config=Game, DefaultConfig)
+class UUserWidget;
+
+/** Project settings for MK_UI's loading-screen coordinator. */
+UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "MKUI Loading Screen Settings"))
 class MK_UI_API UMKUI_LoadingScreenSettings : public UDeveloperSettings
 {
     GENERATED_BODY()
 
 public:
-    // this class will load the soft ptr of loading screen widget and return it to the caller
-    TSubclassOf<UUserWidget> getLoadingScreenWidgetClassChecked() const;
+    TSubclassOf<UUserWidget> getLoadingScreenWidgetClass() const;
 
-    UDataTable* getLoadingConditionsDataTable() const;
+    /** Enables the loading-screen subsystem for map travel and project-owned loading tasks. */
+    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen Settings")
+    bool mbEnableLoadingScreen = false;
 
-    
-    UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
-    TSoftClassPtr<UUserWidget> mSoftLoadingScreenWidgetClass; // the widget we want to show as the loading screen
+    /** Widget displayed above the viewport while loading requirements remain active. */
+    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen Settings", meta = (EditCondition = "mbEnableLoadingScreen"))
+    TSoftClassPtr<UUserWidget> mSoftLoadingScreenWidgetClass;
 
-    // amount of additional seconds to hold loading screen after loading complete (for texture streaming - not showing blurry texture hiccup)
-    UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
-    float mSecsToHoldLoadingScreenAfterLoad = 3.f;
+    /** Minimum additional display time after the world and all loading tasks become ready. */
+    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen Settings", meta = (ClampMin = "0.0", EditCondition = "mbEnableLoadingScreen"))
+    float mSecsToHoldLoadingScreenAfterLoad = 3.0f;
 
-    UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
+    /** Logs the reason for a loading task that remains active this long. Zero disables warnings. */
+    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen Settings", meta = (ClampMin = "0.0", EditCondition = "mbEnableLoadingScreen"))
+    float mLoadingTaskWarningTimeout = 30.0f;
+
+    /** Allows loading screens to appear during Play In Editor sessions. */
+    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen Settings", meta = (EditCondition = "mbEnableLoadingScreen"))
     bool mbShowLoadingScreenInEditor = false;
-
-    // data table representing the loading conditions for each level, where each row corresponds to 1 level.
-    UPROPERTY(Config, EditAnywhere, Category="Loading Screen Settings")
-    TSoftObjectPtr<UDataTable> mLoadingConditionsTable;
-
 };

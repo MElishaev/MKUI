@@ -3,8 +3,8 @@
 
 #include "AsyncActions/MKUI_AsyncAction_PushSoftWidget.h"
 #include "Engine/Engine.h"
-#include "Engine/GameInstance.h"
-#include "Subsystems/MKUI_Subsystem.h"
+#include "Engine/LocalPlayer.h"
+#include "Subsystems/MKUI_LocalPlayerSubsystem.h"
 #include "Widgets/MKUI_W_ActivatableBase.h"
 
 UMKUI_AsyncAction_PushSoftWidget* UMKUI_AsyncAction_PushSoftWidget::pushSoftWidget(const UObject* wco,
@@ -55,6 +55,13 @@ void UMKUI_AsyncAction_PushSoftWidget::Activate()
         }
     };
 
-    const auto uiSubsystem = mCachedOwningWorld->GetGameInstance()->GetSubsystem<UMKUI_Subsystem>();
-    uiSubsystem->pushSoftWidgetToStackAsync(mCachedGameplayTag, mCachedWidgetClass, asyncPushStateCallback);
+    const ULocalPlayer* localPlayer = mCachedOwningPC.IsValid() ? mCachedOwningPC->GetLocalPlayer() : nullptr;
+    if (UMKUI_LocalPlayerSubsystem* uiSubsystem =
+            ULocalPlayer::GetSubsystem<UMKUI_LocalPlayerSubsystem>(localPlayer)) {
+        uiSubsystem->pushSoftWidgetToStackAsync(mCachedGameplayTag, mCachedWidgetClass, asyncPushStateCallback);
+    }
+    else {
+        UE_LOG(LogTemp, Error, TEXT("MK_UI could not resolve the owning local player's UI subsystem."));
+        SetReadyToDestroy();
+    }
 }

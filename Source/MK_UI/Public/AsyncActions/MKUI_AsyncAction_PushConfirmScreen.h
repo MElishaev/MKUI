@@ -8,6 +8,7 @@
 
 enum class EConfirmScreenButtonType : uint8;
 enum class EConfirmScreenType : uint8;
+class UMKUI_LocalPlayerSubsystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConfirmButtonClicked, EConfirmScreenButtonType, buttonType);
 
@@ -21,7 +22,8 @@ class MK_UI_API UMKUI_AsyncAction_PushConfirmScreen : public UBlueprintAsyncActi
 
 public:
     UFUNCTION(BlueprintCallable,
-        meta=(WorldContext="wco", HidePin="wco", BlueprintInternalUseOnly="true", DisplayName="Show Confirmation Screen"))
+              Category = "MKUI",
+              meta=(WorldContext="wco", HidePin="wco", BlueprintInternalUseOnly="true", DisplayName="Show Confirmation Screen"))
     static UMKUI_AsyncAction_PushConfirmScreen* pushConfirmScreen(const UObject* wco,
                                                                   EConfirmScreenType screenType,
                                                                   FText screenTitle,
@@ -29,10 +31,11 @@ public:
 
     virtual void Activate() override;
 
-    UPROPERTY(BlueprintAssignable)
+    UPROPERTY(BlueprintAssignable, Category = "MKUI")
     FOnConfirmButtonClicked onButtonClicked;
+
 private:
-    TWeakObjectPtr<UWorld> mCachedOwningWorld;
+    TWeakObjectPtr<UMKUI_LocalPlayerSubsystem> mCachedUISubsystem;
     EConfirmScreenType mCachedScreenType;
     FText mCachedScreenTitle;
     FText mCachedScreenMsg;

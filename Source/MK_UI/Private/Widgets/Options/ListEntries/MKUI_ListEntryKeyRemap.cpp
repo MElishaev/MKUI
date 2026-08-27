@@ -5,7 +5,7 @@
 
 #include "MKUI_FunctionLibrary.h"
 #include "MKUI_GameplayTags.h"
-#include "Subsystems/MKUI_Subsystem.h"
+#include "Subsystems/MKUI_LocalPlayerSubsystem.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "Widgets/Components/MKUI_CommonButtonBase.h"
 #include "Widgets/Components/MKUI_CommonListView.h"
@@ -40,7 +40,7 @@ void UMKUI_ListEntryKeyRemap::handleKeyRemapButtonClicked()
 {
     selectThisEntryWidget();
 
-    UMKUI_Subsystem::getInstance(this)->pushSoftWidgetToStackAsync(
+    UMKUI_LocalPlayerSubsystem::getInstance(this)->pushSoftWidgetToStackAsync(
         MKUI_GameplayTags::MKUI_widgetStack_modal,
         UMKUI_FunctionLibrary::getSoftWidgetClassByTag(MKUI_GameplayTags::MKUI_widget_keyRemapScreen),
         [this](EAsyncPushWidgetState pushState, UMKUI_W_ActivatableBase* pushedwidget) {
@@ -67,7 +67,7 @@ void UMKUI_ListEntryKeyRemap::handleResetKeyBindingButtonClicked()
 
     // if current key is already the default key, display OK screen that says this is already the default
     if (!mCachedOwningKeyRemapDataObject->canResetBackToDefaultValue()) {
-        UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+        UMKUI_LocalPlayerSubsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
             EConfirmScreenType::Ok,
             FText::FromString(TEXT("Reset key mapping")),
             FText::FromString(TEXT("This key binding is already set to default")),
@@ -78,7 +78,7 @@ void UMKUI_ListEntryKeyRemap::handleResetKeyBindingButtonClicked()
     }
 
     // else reset the binding back to default
-    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+    UMKUI_LocalPlayerSubsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
         EConfirmScreenType::YesNo,
         FText::FromString(TEXT("Reset key mapping")),
         FText::FromString(
@@ -107,7 +107,7 @@ void UMKUI_ListEntryKeyRemap::handleKeyToRemapPressed(const FKey& pressedKey)
 
 void UMKUI_ListEntryKeyRemap::handleKeyRemapCanceled(const FString& cancelReason)
 {
-    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+    UMKUI_LocalPlayerSubsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
         EConfirmScreenType::Ok,
         FText::FromString(TEXT("Key Remap")),
         FText::FromString(cancelReason),
@@ -141,7 +141,7 @@ void UMKUI_ListEntryKeyRemap::showBindConfirmationScreen(const FKey& keyToBind)
 
     const FText boundAction = boundDataObjectOfPressedKey->getOwningKeyMapping()->GetDisplayName();
 
-    UMKUI_Subsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
+    UMKUI_LocalPlayerSubsystem::getInstance(this)->pushConfirmScreenToModalStackAsync(
         EConfirmScreenType::OkCancel,
         FText::FromString(TEXT("Rebind existing binding")),
         FText::FromString(FString::Printf(

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MKUITypes/MKUISubsystemTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "MKUI_Subsystem.generated.h"
 
@@ -13,16 +14,11 @@ class UMKUI_W_ActivatableBase;
 struct FGameplayTag;
 class UMKUI_W_PrimaryLayout;
 
-enum class EAsyncPushWidgetState : uint8
-{
-    OnCreatedBeforePush,
-    AfterPush
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnButtonDescriptionUpdated, UMKUI_CommonButtonBase*, button, FText, description);
 
 /**
- * This subsystem act as easy access to the UI and widgets system in the game.
+ * Compatibility facade for the original game-instance-wide MK_UI API.
+ * New integrations should use UMKUI_LocalPlayerSubsystem so UI is scoped to a local player.
  */
 UCLASS()
 class MK_UI_API UMKUI_Subsystem : public UGameInstanceSubsystem
@@ -33,14 +29,14 @@ public:
     // method for easy access through cpp
     static UMKUI_Subsystem* getInstance(const UObject* worldContextObject);
 
-    virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+    virtual bool ShouldCreateSubsystem(UObject* outer) const override;
 
-    virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+    virtual void Initialize(FSubsystemCollectionBase& collection) override;
 
-    UFUNCTION(BlueprintCallable, Category="MKUI")
+    UFUNCTION(BlueprintCallable, Category = "MKUI")
     void registerPrimaryLayoutWidget(UMKUI_W_PrimaryLayout* widget);
 
-    UFUNCTION(BlueprintCallable, Category="MKUI")
+    UFUNCTION(BlueprintCallable, Category = "MKUI")
     void removeAllWidgetsFromStack(UPARAM(meta=(Categories="MKUI.widgetStack")) const FGameplayTag widgetStackTag);
 
     /**
@@ -62,11 +58,7 @@ public:
                                             TFunction<void(EConfirmScreenButtonType)> buttonClickedCallback);
 
 public:
-    UPROPERTY(BlueprintAssignable)
+    UPROPERTY(BlueprintAssignable, Category = "MKUI")
     FOnButtonDescriptionUpdated onButtonDescUpdated;
 
-private:
-    // This is the primary layout that holds the widget stacks of the entire UI in the game. See class doc for more info.
-    UPROPERTY(Transient)
-    UMKUI_W_PrimaryLayout* mPrimaryLayout;
 };

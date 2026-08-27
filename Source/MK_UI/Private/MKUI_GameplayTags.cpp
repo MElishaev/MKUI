@@ -17,8 +17,9 @@ namespace MKUI_GameplayTags
     UE_DEFINE_GAMEPLAY_TAG(MKUI_widget_storyScreen, "MKUI.widget.storyScreen");
     UE_DEFINE_GAMEPLAY_TAG(MKUI_widget_optionsScreen, "MKUI.widget.optionsScreen");
     UE_DEFINE_GAMEPLAY_TAG(MKUI_widget_keyRemapScreen, "MKUI.widget.keyRemapScreen");
-    
+    UE_DEFINE_GAMEPLAY_TAG(MKUI_widget_creditsScreen, "MKUI.widget.creditsScreen");
+
     // options image
     UE_DEFINE_GAMEPLAY_TAG(MKUI_image_testImage, "MKUI.image.testImage");
 
-}
+} // namespace MKUI_GameplayTags
